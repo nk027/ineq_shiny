@@ -1,0 +1,167 @@
+@import url("https://fonts.googleapis.com/css?family=Noto+Sans|Ubuntu+Mono|Merriweather");
+@import url("https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css");
+@import url("https://use.fontawesome.com/releases/v5.2.0/css/all.css");
+
+html {
+  font-size: 15px;
+}
+html, body {
+  color: #444;
+  font-family: "Noto Sans", sans-serif;
+  background-color: #F7F7F7;
+}
+h1, h2, h3, h4, h5 {
+  color: #444;
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: "Merriweather", serif;
+}
+
+.main-container {
+  max-width: 1240px !important;
+  padding: 0 40px !important;
+}
+@media only screen and (max-width: 400px) {
+  .main-container{
+    padding: 0 20px !important;
+  }
+}
+
+.card, .card-header:first-child {
+  border: 1px solid #DDD;
+  border-radius: 0;
+}
+.card-header {
+  background-color: #EEE;
+  font-size: 1.2rem;
+}
+a.card:hover {
+  text-decoration: none !important;
+  background-color: #DDD;
+}
+
+.row-tight {
+  margin-right: -5px;
+  margin-left: -5px;
+}
+.row-tight .col-sm-3, .row-tight .col-sm4 {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+
+/* selection settings */
+  .main_selection {
+    text-align: center;
+  }
+  .main_selection .form-group {
+    text-align: center;
+    width: auto;
+  }
+  .main_selection .form-group .selectize-dropdown {
+    min-width: 250px;
+  }
+  .main_selection .form-group .selectize-input {
+    overflow: inherit;
+    background-color: #EEE;
+    border: 1px solid #DDD;
+    border-radius: 0;
+  }
+  .main_selection .form-group .selectize-input.focus {
+    background-color: #EEE;
+    box-shadow: none;
+  }
+  .main_selection .form-group .selectize-input .item, .main_selection .selectize-control.single .selectize-input input {
+    color: #008080;
+    font-size: 2.5rem;
+    font-weight: bold;
+    font-family: "Merriweather", sans-serif;
+    text-transform: uppercase;
+  }
+  .main_selection .selectize-control.single .selectize-input::after {
+    border-color: #008080 transparent transparent transparent;
+  }
+  .main_selection .selectize-control.single .selectize-input.dropdown-active::after {
+    border-color: transparent transparent #008080 transparent;
+  }
+
+/* .widget settings */
+  .widget-card {
+    transition: background-color 0.5s ease-in-out;
+    background-color: #EEE;
+    border: 1px solid #DDD;
+    border-radius: 0;
+  }
+  .widget-title {
+    color: #444;
+    font-weight: bold;
+    font-family: "Noto Sans", sans-serif;
+  }
+  .widget-number {
+    color: #444;
+    font-size: 1.6rem;
+    font-family: "Ubuntu Mono", monospace;
+  }
+  .widget-unit {
+    color: #444;
+    font-size: 0.8rem;
+    font-family: "Ubuntu Mono", monospace;
+  }
+  .widget-title, .widget-unit {
+    text-transform: uppercase;
+  }
+
+/* overview settings */
+  .height-50 {
+    height: 50px;
+  }
+  .width-50 {
+    width: 50px !important;
+  }
+  .pos-rel {
+    position: relative !important;
+  }
+  .font-size-24 {
+    font-size: 24px !important;
+  }
+  .font-size-18 {
+    font-size: 18px !important;
+  }
+  .pos-abs-center {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    -webkit-backface-visibility: hidden;
+  }
+
+/* colour settings */
+  .color-white {
+    color: #fff !important;
+  }
+  .bg-yellow {
+    background-color: #CCAD0A;
+  }
+  .bg-purple {
+    background-color: #8D0E6B;
+  }
+  .bg-darkblue {
+    background-color: #053333;
+  }
+  .bg-brown {
+    background-color: #4D4208;
+  }
+  .color-yellow {
+    color: #CCAD0A;
+  }
+  .color-purple {
+    color: #8D0E6B;
+  }
+  .color-darkblue {
+    color: #053333;
+  }
+  .color-brown {
+    color: #4D4208;
+  }
