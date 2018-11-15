@@ -77,6 +77,7 @@ a.card:hover {
     font-weight: bold;
     font-family: "Merriweather", sans-serif;
     text-transform: uppercase;
+    margin-top: 0.2em;
   }
   .main_selection .selectize-control.single .selectize-input::after {
     border-color: #008080 transparent transparent transparent;
