@@ -17,7 +17,9 @@ library(plotly)
 library(ggplot2)
 
 # Data
-data <- data.frame("country" = c("AUT", "AUT", "AUT", "GER", "GER", "GER", "ITA", "ITA", "ITA"),
+data <- data.frame("country" = c("Austria", "Austria", "Austria", 
+                                 "Germany", "Germany", "Germany", 
+                                 "Italy", "Italy", "Italy"),
                    "year" = rep(c(2000, 2005, 2010), 3),
                    "gini" = c(0.45, 0.5, 0.7, 0.6, 0.55, 0.65, 0.4, 0.4, 0.5),
                    "inc_mean" = c(10000, 11500, 12000, 9000, 8500, 10000, 7000, 8000, 10000),
@@ -42,27 +44,27 @@ tags$div(
 html_overview <- function(title, number, units, 
                           icon_class, icon_color, 
                           href_id) {
-  out <- tags$div(class = "col-sm-3",
+  out <- tags$div(class = "col-sm-3 plr-5",
   tags$a(href = paste0("#", href_id), 
     class = "card widget-card h-100",
     tags$div(class = "card-block font-weight-300 py-2 px-2",
     tags$div(class = "media",
-    tags$div(class = "d-flex mr-2 align-self-center",
-    tags$div(class = paste("pos-rel width-50 height-50 font-size-18 font-size-24 color-white rounded-circle", icon_color),
-    tags$span(class = paste("fas pos-abs-center", icon_class)))),
+    tags$div(class = "d-flex mr-2 align-self-center"),
+    tags$div(class = paste("pos-abs width-2 height-2 crnr", icon_color))),
     tags$div(class = "media-body align-self-center",
-    tags$div(class = "align-items-center mb-1",
+    tags$div(class = "align-items-center", #mb-1",
     tags$div(class = "widget-title", title),
     tags$div(class = "widget-number-element",
     tags$span(class = "widget-number", number)), 
-    tags$div(class = "widget-unit", units))))))
+    tags$div(class = "widget-unit", units)
+    ))))
   )
   return(out)
 }
 
 # Create reactive text elements
 tags$div(
-  class = "row row-tight my-4 mb-4",
+  class = "row row-tight my-2 mb-2",
   html_overview(
     title = "Mean Income",
     number = "12,500",
@@ -80,7 +82,38 @@ tags$div(
   html_overview(
     title = "Gini Index",
     number = "0.7",
-    units = HTML(paste0("(0 to 1 (total inequality))")),
+    units = HTML(paste0("(0 to 1)")),
+    icon_color = "bg-darkblue",
+    icon_class = "fa-users",
+    href_id = "section1"),
+  html_overview(
+    title = "Gender Pay Gap",
+    number = "20%",
+    units = HTML(paste0("(in percent of income)")),
+    icon_color = "bg-brown",
+    icon_class = "fa-female",
+    href_id = "section1")
+)
+tags$div(
+  class = "row row-tight my-2 mb-2",
+  html_overview(
+    title = "Mean Income",
+    number = "12,500",
+    units = HTML(paste0("(in EUR)")),
+    icon_color = "bg-yellow",
+    icon_class = "fa-coins",
+    href_id = "section1"),
+  html_overview(
+    title = "Poverty-Risk",
+    number = "10%",
+    units = HTML(paste0("(in percent)")),
+    icon_color = "bg-purple",
+    icon_class = "fa-credit-card",
+    href_id = "section2"),
+  html_overview(
+    title = "Gini Index",
+    number = "0.7",
+    units = HTML(paste0("(0 to 1)")),
     icon_color = "bg-darkblue",
     icon_class = "fa-users",
     href_id = "section1"),
