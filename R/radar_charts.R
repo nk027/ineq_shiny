@@ -33,11 +33,11 @@ p <- plot_ly(
   layout(
     polar = list(
       radialaxis = list(
-        visible = T, 
+        visible = TRUE, 
         range= c(0, 1)
       )
     ), 
-    showlegend = F
+    showlegend = FALSE
   )
 
 p
