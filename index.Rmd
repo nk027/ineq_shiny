@@ -17,14 +17,16 @@ library(plotly)
 library(ggplot2)
 
 # Data
-data <- data.frame("country" = c("Austria", "Austria", "Austria", 
-                                 "Germany", "Germany", "Germany", 
-                                 "Italy", "Italy", "Italy"),
+data <- data.frame("country" = c("AT", "AT", "AT", 
+                                 "DE", "DE", "DE", 
+                                 "IT", "IT", "IT"),
                    "year" = rep(c(2000, 2005, 2010), 3),
                    "gini" = c(0.45, 0.5, 0.7, 0.6, 0.55, 0.65, 0.4, 0.4, 0.5),
                    "inc_mean" = c(10000, 11500, 12000, 9000, 8500, 10000, 7000, 8000, 10000),
                    "inc_med" = c(8000, 9500, 13000, 6000, 7500, 11000, 5000, 6000, 9500),
                    "improved" = c(rep(TRUE, 3), rep(FALSE, 3), rep(TRUE, 3)))
+ind_ps <- readRDS("./data/indicators_pers.RDS")
+
 ```
 
 ```{r, echo=FALSE}
@@ -33,7 +35,7 @@ data <- data.frame("country" = c("Austria", "Austria", "Austria",
 #
 
 # Input for country selection
-selector <- selectInput("country", NULL, choices = unique(data$country))
+selector <- selectInput("country", NULL, choices = unique(ind_ps$country))
 tags$div(
   class = "main_selection",
   tags$h1("Inequality Profile for"),
@@ -42,7 +44,7 @@ tags$div(
 
 # Header overview-widget
 html_overview <- function(title, number, units, 
-                          icon_class, icon_color, 
+                          color, 
                           href_id) {
   out <- tags$div(class = "col-sm-3 plr-5",
   tags$a(href = paste0("#", href_id), 
@@ -50,7 +52,7 @@ html_overview <- function(title, number, units,
     tags$div(class = "card-block font-weight-300 py-2 px-2",
     tags$div(class = "media",
     tags$div(class = "d-flex mr-2 align-self-center"),
-    tags$div(class = paste("pos-abs width-2 height-2 crnr", icon_color))),
+    tags$div(class = paste("pos-abs width-2 height-2 crnr", color))),
     tags$div(class = "media-body align-self-center",
     tags$div(class = "align-items-center", #mb-1",
     tags$div(class = "widget-title", title),
@@ -62,67 +64,95 @@ html_overview <- function(title, number, units,
   return(out)
 }
 
+# Prepare Values to be displayed
+output$mean_inc <- renderText(
+  # req(input)
+  # isolate() falls nicht sofort laden
+  # needs to be in renderText, then accessed via textOutput
+  format(info$mean[ind_ps$country == input$country], 
+         digits = 5, big.mark = ",")
+)
+
 # Create reactive text elements
 tags$div(
   class = "row row-tight my-2 mb-2",
   html_overview(
     title = "Mean Income",
-    number = "12,500",
-    units = HTML(paste0("(in EUR)")),
-    icon_color = "bg-yellow",
-    icon_class = "fa-coins",
+    number = textOutput("mean_inc", inline = TRUE),
+    units = "(in EUR)",
+    color = "bg-yellow",
     href_id = "section1"),
   html_overview(
-    title = "Poverty-Risk",
-    number = "10%",
-    units = HTML(paste0("(in percent)")),
-    icon_color = "bg-purple",
-    icon_class = "fa-credit-card",
-    href_id = "section2"),
+    title = "Median Income",
+    number = "9,500",
+    units = "(in EUR)",
+    color = "bg-purple",
+    href_id = "section1"),
   html_overview(
     title = "Gini Index",
     number = "0.7",
-    units = HTML(paste0("(0 to 1)")),
-    icon_color = "bg-darkblue",
-    icon_class = "fa-users",
+    units = "(inequality from 0 to 1)",
+    color = "bg-darkblue",
     href_id = "section1"),
   html_overview(
     title = "Gender Pay Gap",
     number = "20%",
-    units = HTML(paste0("(in percent of income)")),
-    icon_color = "bg-brown",
-    icon_class = "fa-female",
+    units = "(in percent)",
+    color = "bg-brown",
     href_id = "section1")
 )
 tags$div(
   class = "row row-tight my-2 mb-2",
   html_overview(
-    title = "Mean Income",
-    number = "12,500",
-    units = HTML(paste0("(in EUR)")),
-    icon_color = "bg-yellow",
-    icon_class = "fa-coins",
+    title = "At-Risk-of-Poverty",
+    number = "18%",
+    units = "(rate in percent)",
+    color = "bg-yellow",
     href_id = "section1"),
   html_overview(
-    title = "Poverty-Risk",
-    number = "10%",
-    units = HTML(paste0("(in percent)")),
-    icon_color = "bg-purple",
-    icon_class = "fa-credit-card",
-    href_id = "section2"),
-  html_overview(
-    title = "Gini Index",
-    number = "0.7",
-    units = HTML(paste0("(0 to 1)")),
-    icon_color = "bg-darkblue",
-    icon_class = "fa-users",
+    title = "At-Risk-of-Poverty",
+    number = "1,200",
+    units = "(threshold in EUR)",
+    color = "bg-purple",
     href_id = "section1"),
   html_overview(
-    title = "Gender Pay Gap",
+    title = "Top 1% Income Share ",
+    number = "40%",
+    units = "(in percent)",
+    color = "bg-darkblue",
+    href_id = "section1"),
+  html_overview(
+    title = "Quintile Share Ratio",
+    number = "0.2",
+    units = "(S80/S20)",
+    color = "bg-brown",
+    href_id = "section1")
+)
+tags$div(
+  class = "row row-tight my-2 mb-2",
+  html_overview(
+    title = "Life Expectancy",
+    number = "84",
+    units = "(in years)",
+    color = "bg-yellow",
+    href_id = "section1"),
+  html_overview(
+    title = "Healthy Life Expectancy",
+    number = "72",
+    units = "(in years)",
+    color = "bg-purple",
+    href_id = "section1"),
+  html_overview(
+    title = "Unemployment Rate",
     number = "20%",
-    units = HTML(paste0("(in percent of income)")),
-    icon_color = "bg-brown",
-    icon_class = "fa-female",
+    units = "(in percent)",
+    color = "bg-darkblue",
+    href_id = "section1"),
+  html_overview(
+    title = "Low-Wage Share",
+    number = "8%",
+    units = "(in percent)",
+    color = "bg-brown",
     href_id = "section1")
 )
 ```
