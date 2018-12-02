@@ -7,6 +7,16 @@ library(plotly)
 country <- "CZ"
 year <- c(2007:2016)
 
+# Connect to the PostgreSQL database
+if(issue_1_dealt_with) {
+  pg <- src_postgres(dbname = "dbname", host = "host",
+                     user = "user", password = "password",
+                     options = "options")
+} else {
+  stop("Please deal with Issue #1.")
+}
+
+
 # Download data --------------------------------------------------------------------------------------------
 silc.p <- tbl(pg, "pp") %>%
   filter(pb020 %in% country & pb010 %in% year) %>%
