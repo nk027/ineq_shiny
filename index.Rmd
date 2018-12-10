@@ -15,9 +15,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(plotly)
 library(ggplot2)
+library(countrycode) # get rid of this at some point
 
 # Data
-data <- data.frame("country" = c("AT", "AT", "AT", 
+data <- data.frame("country" = c("Austria", "Austria", "Austria", 
                                  "DE", "DE", "DE", 
                                  "IT", "IT", "IT"),
                    "year" = rep(c(2000, 2005, 2010), 3),
@@ -26,6 +27,7 @@ data <- data.frame("country" = c("AT", "AT", "AT",
                    "inc_med" = c(8000, 9500, 13000, 6000, 7500, 11000, 5000, 6000, 9500),
                    "improved" = c(rep(TRUE, 3), rep(FALSE, 3), rep(TRUE, 3)))
 ind_ps <- readRDS("./data/indicators_pers.RDS")
+ind_ps$country <- countrycode(ind_ps$country, origin = "eurostat", destination = "country.name")
 
 ```
 
@@ -44,11 +46,13 @@ tags$div(
 
 # Header overview-widget
 html_overview <- function(title, number, units, 
-                          color, 
+                          color,
                           href_id) {
+  color_hover <- paste0(color, "-h")
+  
   out <- tags$div(class = "col-sm-3 plr-5",
   tags$a(href = paste0("#", href_id), 
-    class = "card widget-card h-100",
+    class = paste("card widget-card h-100", color_hover),
     tags$div(class = "card-block font-weight-300 py-2 px-2",
     tags$div(class = "media",
     tags$div(class = "d-flex mr-2 align-self-center"),
@@ -65,12 +69,25 @@ html_overview <- function(title, number, units,
 }
 
 # Prepare Values to be displayed
+  # We still need:
+  # req(input) somewhere, &
+  # isolate() others
+  # to minimise operations
 output$mean_inc <- renderText(
-  # req(input)
-  # isolate() falls nicht sofort laden
-  # needs to be in renderText, then accessed via textOutput
-  format(info$mean[ind_ps$country == input$country], 
+  format(ind_ps$mean[ind_ps$country == input$country], 
          digits = 5, big.mark = ",")
+)
+output$med_inc <- renderText(
+  format(ind_ps$median[ind_ps$country == input$country], 
+         digits = 5, big.mark = ",")
+)
+output$gini <- renderText(
+  format(ind_ps$gini[ind_ps$country == input$country], 
+         digits = 3, big.mark = ",")
+)
+output$qsr80 <- renderText(
+  format(ind_ps$qsr80[ind_ps$country == input$country], 
+         digits = 3, big.mark = ",")
 )
 
 # Create reactive text elements
@@ -78,80 +95,26 @@ tags$div(
   class = "row row-tight my-2 mb-2",
   html_overview(
     title = "Mean Income",
-    number = textOutput("mean_inc", inline = TRUE),
+    number = textOutput("mean_inc", inline = FALSE),
     units = "(in EUR)",
     color = "bg-yellow",
     href_id = "section1"),
   html_overview(
     title = "Median Income",
-    number = "9,500",
+    number = textOutput("med_inc", inline = FALSE),
     units = "(in EUR)",
     color = "bg-purple",
     href_id = "section1"),
   html_overview(
     title = "Gini Index",
-    number = "0.7",
+    number = textOutput("gini", inline = FALSE),
     units = "(inequality from 0 to 1)",
     color = "bg-darkblue",
     href_id = "section1"),
   html_overview(
-    title = "Gender Pay Gap",
-    number = "20%",
-    units = "(in percent)",
-    color = "bg-brown",
-    href_id = "section1")
-)
-tags$div(
-  class = "row row-tight my-2 mb-2",
-  html_overview(
-    title = "At-Risk-of-Poverty",
-    number = "18%",
-    units = "(rate in percent)",
-    color = "bg-yellow",
-    href_id = "section1"),
-  html_overview(
-    title = "At-Risk-of-Poverty",
-    number = "1,200",
-    units = "(threshold in EUR)",
-    color = "bg-purple",
-    href_id = "section1"),
-  html_overview(
-    title = "Top 1% Income Share ",
-    number = "40%",
-    units = "(in percent)",
-    color = "bg-darkblue",
-    href_id = "section1"),
-  html_overview(
-    title = "Quintile Share Ratio",
-    number = "0.2",
-    units = "(S80/S20)",
-    color = "bg-brown",
-    href_id = "section1")
-)
-tags$div(
-  class = "row row-tight my-2 mb-2",
-  html_overview(
-    title = "Life Expectancy",
-    number = "84",
-    units = "(in years)",
-    color = "bg-yellow",
-    href_id = "section1"),
-  html_overview(
-    title = "Healthy Life Expectancy",
-    number = "72",
-    units = "(in years)",
-    color = "bg-purple",
-    href_id = "section1"),
-  html_overview(
-    title = "Unemployment Rate",
-    number = "20%",
-    units = "(in percent)",
-    color = "bg-darkblue",
-    href_id = "section1"),
-  html_overview(
-    title = "Low-Wage Share",
-    number = "8%",
-    units = "(in percent)",
+    title = "Quantile Share Ratio",
+    number = textOutput("qsr80", inline = FALSE),
+    units = "(80 to 20)",
     color = "bg-brown",
     href_id = "section1")
 )
@@ -232,16 +195,16 @@ plot_section1_a <- plot_section1_b <- renderPlotly({
 #
 
 # Header for section #1
-tags$div(class = "mb-4", id = "section1",
-  tags$h1(class = "color-yellow mb-2",
-          HTML("<i class='fas fa-coins'></i> Section #1")),
-  tags$div(class = "row mt-4 mb-4",
-  tags$div(class = "col-sm-12",
-           HTML("Some information about indicators in section #1.")))
-)
+# tags$div(class = "mb-4", id = "section1",
+#   tags$h1(class = "color-yellow mb-2",
+#           HTML("Section #1")),
+#   tags$div(class = "row mt-4 mb-4",
+#   tags$div(class = "col-sm-12",
+#            HTML("Some information about indicators in section #1.")))
+# )
 
 # First row of section 1, one full-width card
-tags$div(class = "card mb-2",
+tags$div(class = "card mb-2", id = "section1",
   tags$div(class = "card-header",
            HTML("Income over Time")),
   tags$div(class = "card-body",
@@ -251,7 +214,7 @@ tags$div(class = "card mb-2",
 )
 
 # Second row of section 1, three cards beside each other
-tags$div(class = "row",
+tags$div(class = "row", id = "section2",
   tags$div(class = "col-sm-4",
   tags$div(class = "card", 
   tags$div(class = "card-header",
@@ -272,50 +235,5 @@ tags$div(class = "row",
   tags$div(class = "card-body",
            style = "height: 300px;",
            plot_section1_b)))
-)
-```
-
-```{r, echo=FALSE}
-#
-# Section 2
-#
-
-# Header for section #2
-tags$div(class = "mb-4", id = "section2",
-  tags$h1(class = "color-purple mb-2",
-          HTML("<i class='fas fa-credit-card'></i> Section #2")),
-  tags$div(class = "row mt-4 mb-4",
-  tags$div(class = "col-sm-12",
-           HTML("Some information about indicators in section #2.")))
-)
-```
-
-```{r, echo=FALSE}
-#
-# Section 3
-#
-
-# Header for section #2
-tags$div(class = "mb-4", id = "section3",
-  tags$h1(class = "color-darkblue mb-2",
-          HTML("<i class='fas fa-users'></i> Section #3")),
-  tags$div(class = "row mt-4 mb-4",
-  tags$div(class = "col-sm-12",
-           HTML("Some information about indicators in section #4.")))
-)
-```
-
-```{r, echo=FALSE}
-#
-# Section 4
-#
-
-# Header for section #4
-tags$div(class = "mb-4", id = "section4",
-  tags$h1(class = "color-brown mb-2",
-          HTML("<i class='fas fa-female'></i> Section #4")),
-  tags$div(class = "row mt-4 mb-4",
-  tags$div(class = "col-sm-12",
-           HTML("Some information about indicators in section #4.")))
 )
 ```

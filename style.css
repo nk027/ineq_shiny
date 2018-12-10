@@ -153,6 +153,18 @@ a.card:hover {
     border-right-color: #4D4208;
     border-bottom-color: #4D4208;
   }
+  .bg-yellow-h:hover {
+    background-color: #CCAD0A !important;
+  }
+  .bg-purple-h:hover {
+    background-color: #8D0E6B !important;
+  }
+  .bg-darkblue-h:hover {
+    background-color: #053333 !important;
+  }
+  .bg-brown-h:hover {
+    background-color: #4D4208 !important;
+  }
   .color-yellow {
     color: #CCAD0A;
   }
