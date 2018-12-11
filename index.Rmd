@@ -27,7 +27,9 @@ data <- data.frame("country" = c("Austria", "Austria", "Austria",
                    "inc_med" = c(8000, 9500, 13000, 6000, 7500, 11000, 5000, 6000, 9500),
                    "improved" = c(rep(TRUE, 3), rep(FALSE, 3), rep(TRUE, 3)))
 ind_ps <- readRDS("./data/indicators_pers.RDS")
-ind_ps$country <- countrycode(ind_ps$country, origin = "eurostat", destination = "country.name")
+ind_ps$country <- countrycode(ind_ps$country, 
+                              origin = "eurostat", 
+                              destination = "country.name")
 
 ```
 
@@ -58,7 +60,7 @@ html_overview <- function(title, number, units,
     tags$div(class = "d-flex mr-2 align-self-center"),
     tags$div(class = paste("pos-abs width-2 height-2 crnr", color))),
     tags$div(class = "media-body align-self-center",
-    tags$div(class = "align-items-center", #mb-1",
+    tags$div(class = "align-items-center",
     tags$div(class = "widget-title", title),
     tags$div(class = "widget-number-element",
     tags$span(class = "widget-number", number)), 
