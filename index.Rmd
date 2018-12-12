@@ -18,7 +18,7 @@ library(ggplot2)
 library(countrycode) # get rid of this at some point
 
 # Data
-data <- data.frame("country" = c("Austria", "Austria", "Austria", 
+data <- data.frame("country" = c("AT", "AT", "AT", 
                                  "DE", "DE", "DE", 
                                  "IT", "IT", "IT"),
                    "year" = rep(c(2000, 2005, 2010), 3),
