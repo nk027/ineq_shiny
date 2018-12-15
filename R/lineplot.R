@@ -4,11 +4,12 @@ library(plotly)
 
 input <- list()
 input$country <- "AT"
-neighbours <- data.frame("AT" = c("DE", "IT", "SI"))
+neighbours <- data.frame("AT" = c("AT", "DE", "IT", "SI"))
 
 ind_ps <- readRDS("./data/indicators_pers.RDS")
 
 gdp <- get_eurostat("nama_10_pc")
+poverty <- get_eurostat("ilc_peps01")
 
 
 inc_time <- gdp %>%
