@@ -1,5 +1,5 @@
 ---
-pagetitle: "Ineq"
+pagetitle: "Income Inequality Profiles"
 author: "Nikolas Kuschnig"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
@@ -28,10 +28,10 @@ countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG",
                "Poland" = "PL", "Portugal" = "PT", "Romania" = "RO",
                "Sweden" = "SE", "Slovenia" = "SI", "Slovakia" = "SK",
                "United Kingdom" = "UK")
-neighbours <- readRDS("data/neighbours.rds")
-data_widget <- readRDS("data/widget.rds")
-map_poverty <- readRDS("data/poverty_map.rds")
-data <- readRDS("data/eurostat.rds") # Break down
+neighbours <- readRDS("data/neighbours.rds") # Picks not yet ideal
+data_widget <- readRDS("data/widget.rds") # More indicators
+map_poverty <- readRDS("data/poverty_map.rds") # Maybe edit hover-info
+data <- readRDS("data/eurostat.rds") # Break this down
 ```
 
 ```{r, echo=FALSE}
@@ -49,9 +49,7 @@ tags$div(
 )
 
 # Header overview-widget
-html_overview <- function(title, number, units, 
-                          color,
-                          href_id) {
+html_overview <- function(title, number, units, color, href_id) {
   color_hover <- paste0(color, "-h")
   
   out <- tags$div(class = "col-sm-3 plr-5",
@@ -77,6 +75,7 @@ html_overview <- function(title, number, units,
   # req(input) somewhere, &
   # isolate() others
   # to minimise operations
+
 output$mean_inc <- renderText(
   format(data_widget$mean_inc$values[data_widget$mean_inc$country == input$country], 
          digits = 5, big.mark = ",")
@@ -170,7 +169,7 @@ output$info1 <- renderText({
     select(values)
   improved <- text_data < 15
   # To-do: Think of some text to generate
-  sprintf("%s has a %s at-risk-of-poverty rate!", isolate({input$country}),
+  sprintf("%s has a relatively %s at-risk-of-poverty rate!", isolate({input$country}),
           ifelse(improved, "low (<15%)", "high (>15%)"))
 })
 
@@ -178,24 +177,21 @@ plot_inc <- renderPlotly({
   req(input$country)
   
   inc_mean_self <- data$inc_mean %>% 
-    filter(geo == input$country, time >= "2005-01-01")
+    filter(geo == input$country)
   inc_med_self <- data$inc_med %>% 
-    filter(geo == input$country, time >= "2005-01-01")
+    filter(geo == input$country)
   
   inc_mean <- data$inc_mean %>% 
-    filter(geo %in% neighbours[[input$country]], time >= "2005-01-01")
+    filter(geo %in% neighbours[[input$country]])
   inc_med <- data$inc_med %>% 
-    filter(geo %in% neighbours[[input$country]], time >= "2005-01-01")
+    filter(geo %in% neighbours[[input$country]])
   
-  ggplot_inc <- ggplot(inc_mean_self, aes(x = time, colour = geo)) +
+  ggplot_inc <- ggplot(inc_mean_self, aes(x = time)) +
     scale_color_manual(values = rev(teals)) +
-    geom_ribbon(data = inc_mean,
-                aes(ymin = inc_mean$values, ymax = inc_med$values), 
-                fill = rgb(0.2, 0.2, 0.2, 0.1)) +
-    geom_ribbon(aes(ymin = inc_mean_self$values, ymax = inc_med_self$values),
-                colour = "#aa2020", fill = rgb(0, 0, 0, 0)) +
-    geom_ribbon(aes(ymin = inc_mean_self$values, ymax = inc_med_self$values), 
-                fill = "#aa2020", alpha = 0.2) +
+    geom_line(data = inc_mean, aes(colour = geo, y = values)) +
+    geom_line(data = inc_med, aes(colour = geo, y = values), linetype = 3) +
+    geom_line(data = inc_mean_self, aes(y = values), colour = "#aa2020") +
+    geom_line(data = inc_med_self, aes(y = values), colour = "#aa2020", linetype = 3) +
     scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y")) +
     scale_y_continuous(labels = scales::number_format(), expand = c(0, 0)) +
     theme(
@@ -212,7 +208,9 @@ plot_inc <- renderPlotly({
 
   ggplotly(ggplot_inc, tooltip = "geo") %>% 
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
-    layout(legend = list(orientation = "v", yanchor = "center", y = 0.6))
+    plotly::layout(title = names(countries)[countries == input$country],
+                   legend = list(orientation = "v", yanchor = "center", y = 0.6),
+                   yaxis = list(title = "Equivalised net income in EUR"))
 })
 
 plot_map <- renderPlotly({
@@ -248,7 +246,7 @@ tags$div(class = "card mb-2", id = "section1",
   tags$div(class = "card-header",
            HTML("Mean and median incomes over time")),
   tags$div(class = "card-body",
-           HTML("The distance between mean and median income indicates skewedness of the income distribution.")),
+           HTML("The distance between mean and median (dotted) income indicates skewedness of the income distribution.")),
   tags$div(class = "card-body",
   plot_inc)
 )
