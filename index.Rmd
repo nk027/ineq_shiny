@@ -15,22 +15,20 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(plotly)
 library(ggplot2)
-library(countrycode) # get rid of this at some point
+# library(countrycode) # use this to reformat names someday
 
 # Data
-data <- data.frame("country" = c("AT", "AT", "AT", 
-                                 "DE", "DE", "DE", 
-                                 "IT", "IT", "IT"),
-                   "year" = rep(c(2000, 2005, 2010), 3),
-                   "gini" = c(0.45, 0.5, 0.7, 0.6, 0.55, 0.65, 0.4, 0.4, 0.5),
-                   "inc_mean" = c(10000, 11500, 12000, 9000, 8500, 10000, 7000, 8000, 10000),
-                   "inc_med" = c(8000, 9500, 13000, 6000, 7500, 11000, 5000, 6000, 9500),
-                   "improved" = c(rep(TRUE, 3), rep(FALSE, 3), rep(TRUE, 3)))
-ind_ps <- readRDS("./data/indicators_pers.RDS")
-ind_ps$country <- countrycode(ind_ps$country, 
-                              origin = "eurostat", 
-                              destination = "country.name")
-
+data_dummy <- data.frame( # remove
+  "country" = c("AT", "AT", "AT", "DE", "DE", "DE", "IT", "IT", "IT"),
+  "year" = rep(c(2000, 2005, 2010), 3),
+  "gini" = c(0.45, 0.5, 0.7, 0.6, 0.55, 0.65, 0.4, 0.4, 0.5),
+  "inc_mean" = c(10000, 11500, 12000, 9000, 8500, 10000, 7000, 8000, 10000),
+  "inc_med" = c(8000, 9500, 13000, 6000, 7500, 11000, 5000, 6000, 9500),
+  "improved" = c(rep(TRUE, 3), rep(FALSE, 3), rep(TRUE, 3)))
+neighbours <- data.frame("AT" = c("DE", "IT", "SI", "SK", "CZ", "CH")) # KNN?
+ind_ps <- readRDS("./data/indicators_pers.RDS") # replace
+map_poverty <- readRDS("data/poverty_map.rds")
+data <- readRDS("data/eurostat.rds")
 ```
 
 ```{r, echo=FALSE}
@@ -130,7 +128,7 @@ tags$div(
 output$info1 <- renderText({
   req(input$country)
   
-  text_data <- data %>% 
+  text_data <- data_dummy %>% 
     filter(country == input$country & year == max(year))
   improved <- text_data$improved
   # To-do: Think of some text to generate
@@ -138,21 +136,37 @@ output$info1 <- renderText({
           ifelse(improved, "something", "nothing"))
 })
 
-plot_section1 <- renderPlotly({
+plot_inc <- renderPlotly({
   req(input$country)
   
-  inc_time <- data %>%
-    filter(country == input$country) %>% 
-    select(year, inc_mean, inc_med) %>% 
-    mutate(year = as.Date(as.character(year), format = "%Y"))
-  
-  lineplot <- ggplot(inc_time, aes(x = year)) +
-    geom_line(aes(y = inc_mean)) +
-    geom_line(aes(y = inc_med)) +
-    theme_minimal()
-  
-  ggplotly(lineplot, tooltip = "text") %>% 
-    plotly::config(displaylogo = FALSE, collaborate = FALSE)
+  inc_country <- data$inc %>% 
+    filter(indic_il == "MED_E", geo == input$country)
+
+ggplot_inc <- data$inc %>% 
+  filter(indic_il == "MED_E", geo %in% neighbours[[input$country]]) %>%
+  ggplot(aes(x = time, y = values, colour = geo)) +
+  geom_line() +
+  scale_colour_grey() +
+  geom_line(data = inc_country, colour = "#008080") +
+  scale_x_date(expand = c(0, 0), 
+               labels = scales::date_format("%Y")) +
+  scale_y_continuous(labels = scales::number_format(),
+                     expand = c(0, 0)) +
+  theme(
+    axis.title = element_blank(),
+    legend.position = "right",
+    legend.justification = "center",
+    legend.background = element_blank(),
+    legend.title = element_blank(),
+    panel.background = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(colour = rgb(0.85, 0.85, 0.85), size = 0.2),
+    panel.grid.minor = element_blank(),
+    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "lines"))
+
+ggplotly(ggplot_inc, tooltip = "text") %>% 
+  plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
+  layout(legend = list(orientation = "v", yanchor = "center", y = 0.6))
 })
 
 plot_section1_a <- plot_section1_b <- renderPlotly({
@@ -162,32 +176,44 @@ plot_section1_a <- plot_section1_b <- renderPlotly({
              # gini_sel <- filter(data, country == input$country)$gini
              
              # To-do: order data properly
-             gini_comp <- data %>%
-               filter(year == max(year)) %>% 
-               arrange(gini) %>% 
-               mutate(country = factor(country))
-             
-             gini_comp %>% 
-               plot_ly(x = ~gini, y = ~country,
-                       text = ~sprintf("%s: %.2f", country, gini),
-                       marker = list(color = "#008080", line = NULL), 
-                       height = 250, type = "bar", hoverinfo = "text",
-                       orientation = "h") %>% 
-               plotly::layout(margin = list(l = 20, b = 60),
-                              xaxis = list(titlefont = list(family = "Arial",
-                                                            size = 14,
-                                                            color = "rgb(68, 68, 68)"),
-                                           tickfont = list(family = "Arial", 
-                                                           size = 12),
-                                           title = sprintf("Gini of %s", input$country)),
-                              yaxis = list(type = "category",
-                                           categoryorder = "ascending",
-                                           tickfont = list(family = "Arial", 
-                                                           size = 12),
-                                           title = ""),
-                              showlegend = FALSE) %>% 
-               plotly::config(displaylogo = FALSE, collaborate = FALSE)
+               # gini_comp <- data %>%
+               #   filter(year == max(year)) %>% 
+               #   arrange(gini) %>% 
+               #   mutate(country = factor(country))
+               # 
+               # gini_comp %>% 
+               #   plot_ly(x = ~gini, y = ~country,
+               #           text = ~sprintf("%s: %.2f", country, gini),
+               #           marker = list(color = "#008080", line = NULL), 
+               #           height = 250, type = "bar", hoverinfo = "text",
+               #           orientation = "h") %>% 
+               #   plotly::layout(margin = list(l = 20, b = 60),
+               #                  xaxis = list(titlefont = list(family = "Arial",
+               #                                                size = 14,
+               #                                                color = "rgb(68, 68, 68)"),
+               #                               tickfont = list(family = "Arial", 
+               #                                               size = 12),
+               #                               title = sprintf("Gini of %s", input$country)),
+               #                  yaxis = list(type = "category",
+               #                               categoryorder = "ascending",
+               #                               tickfont = list(family = "Arial", 
+               #                                               size = 12),
+               #                               title = ""),
+               #                  showlegend = FALSE) %>% 
+               #   plotly::config(displaylogo = FALSE, collaborate = FALSE)
            })
+
+plot_map <- renderPlotly({
+  map_poverty %>% 
+    plot_ly(split = ~geo, color = ~values, 
+            text = ~paste(geo, "\n", values),
+            hoverinfo = "text", hoveron = "fill",
+            alpha = 1, showlegend = FALSE) %>% 
+    layout(xaxis = list(autorange = FALSE, range = c(-10, 30)), 
+           yaxis = list(autorange = FALSE, range = c(32, 70))) %>% 
+    colorbar(title = "in percent", ticksuffix = "%") %>% 
+    plotly::config(displaylogo = FALSE, collaborate = FALSE)
+})
 ```
 
 
@@ -210,14 +236,14 @@ tags$div(class = "card mb-2", id = "section1",
   tags$div(class = "card-header",
            HTML("Income over Time")),
   tags$div(class = "card-body",
-           HTML("The first indicator deals with mean and median incomes.")),
+           HTML("Mean and median incomes...")),
   tags$div(class = "card-body",
-  plot_section1)
+  plot_inc)
 )
 
 # Second row of section 1, three cards beside each other
 tags$div(class = "row", id = "section2",
-  tags$div(class = "col-sm-4",
+  tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
            HTML("Display reactive text")),
@@ -230,12 +256,12 @@ tags$div(class = "row", id = "section2",
   # tags$div(class = "card-body",
   #          style = "height: 300px;",
   #          plot_section1_a))),
-  tags$div(class = "col-sm-8",
+  tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
-           HTML("Even more plots")),
+           HTML("At-risk-of-poverty rates across Europe")),
   tags$div(class = "card-body",
-           style = "height: 300px;",
-           plot_section1_b)))
+           style = "height: 400;",
+           plot_map)))
 )
 ```

@@ -4,7 +4,7 @@ library(plotly)
 
 input <- list()
 input$country <- "AT"
-neighbours <- data.frame("AT" = c("AT", "DE", "IT", "SI"))
+neighbours <- data.frame("AT" = c("DE", "IT", "SI", "SK", "CZ", "CH"))
 
 ind_ps <- readRDS("./data/indicators_pers.RDS")
 
