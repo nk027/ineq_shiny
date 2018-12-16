@@ -15,12 +15,20 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(plotly)
 library(ggplot2)
-# library(countrycode) # use this to reformat names someday
 
 teals <- c("#c6e2e2", "#a4d1d1", "#7bbdbd", "#49a4a4", "#008080", "#007373")
 
 # Data
-neighbours <- data.frame("AT" = c("DE", "IT", "SI", "HU", "CZ")) # KNN?
+countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG", 
+               "Cyprus" = "CY", "Czech Republic" = "CZ", "Germany" = "DE",
+               "Denmark" = "DE", "Estonia" = "EE", "Greece" = "EL",
+               "Spain" = "ES", "Finland" = "FI", "France" = "FR", 
+               "Croatia" = "HR", "Hungary" = "HU", "Italy" = "IT",
+               "Lithuania" = "LT", "Latvia" = "LV", "Netherlands" = "NL",
+               "Poland" = "PL", "Portugal" = "PT", "Romania" = "RO",
+               "Sweden" = "SE", "Slovenia" = "SI", "Slovakia" = "SK",
+               "United Kingdom" = "UK")
+neighbours <- readRDS("data/neighbours.rds")
 data_widget <- readRDS("data/widget.rds")
 map_poverty <- readRDS("data/poverty_map.rds")
 data <- readRDS("data/eurostat.rds") # Break down
@@ -32,7 +40,8 @@ data <- readRDS("data/eurostat.rds") # Break down
 #
 
 # Input for country selection
-selector <- selectInput("country", NULL, choices = data_widget$mean_inc$country)
+selector <- selectInput("country", NULL, 
+                        choices = countries)
 tags$div(
   class = "main_selection",
   tags$h1("Inequality Profile for"),
@@ -78,7 +87,7 @@ output$med_inc <- renderText(
 )
 output$gini <- renderText(
   format(data_widget$gini$values[data_widget$gini$country == input$country], 
-         digits = 2, big.mark = ",")
+         digits = 3, big.mark = ",")
 )
 output$qsr80 <- renderText(
   format(data_widget$qsr$values[data_widget$qsr$country == input$country], 
