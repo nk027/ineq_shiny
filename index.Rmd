@@ -17,6 +17,8 @@ library(plotly)
 library(ggplot2)
 # library(countrycode) # use this to reformat names someday
 
+teals <- c("#e4f1f1", "#c6e2e2", "#a4d1d1", "#7bbdbd", "#49a4a4", "#008080")
+
 # Data
 data_dummy <- data.frame( # remove
   "country" = c("AT", "AT", "AT", "DE", "DE", "DE", "IT", "IT", "IT"),
@@ -25,10 +27,10 @@ data_dummy <- data.frame( # remove
   "inc_mean" = c(10000, 11500, 12000, 9000, 8500, 10000, 7000, 8000, 10000),
   "inc_med" = c(8000, 9500, 13000, 6000, 7500, 11000, 5000, 6000, 9500),
   "improved" = c(rep(TRUE, 3), rep(FALSE, 3), rep(TRUE, 3)))
-neighbours <- data.frame("AT" = c("DE", "IT", "SI", "SK", "CZ", "CH")) # KNN?
-ind_ps <- readRDS("./data/indicators_pers.RDS") # replace
+neighbours <- data.frame("AT" = c("DE", "IT", "SI", "HU", "CZ")) # KNN?
+ind_ps <- readRDS("./data/indicators_pers.RDS") # replace with Dashboard DF
 map_poverty <- readRDS("data/poverty_map.rds")
-data <- readRDS("data/eurostat.rds")
+data <- readRDS("data/eurostat.rds") # Break down
 ```
 
 ```{r, echo=FALSE}
@@ -83,7 +85,7 @@ output$med_inc <- renderText(
 )
 output$gini <- renderText(
   format(ind_ps$gini[ind_ps$country == input$country], 
-         digits = 3, big.mark = ",")
+         digits = 2, big.mark = ",")
 )
 output$qsr80 <- renderText(
   format(ind_ps$qsr80[ind_ps$country == input$country], 
@@ -108,7 +110,7 @@ tags$div(
   html_overview(
     title = "Gini Index",
     number = textOutput("gini", inline = FALSE),
-    units = "(inequality from 0 to 1)",
+    units = "(0 to 1)",
     color = "bg-darkblue",
     href_id = "section1"),
   html_overview(
@@ -139,69 +141,43 @@ output$info1 <- renderText({
 plot_inc <- renderPlotly({
   req(input$country)
   
-  inc_country <- data$inc %>% 
-    filter(indic_il == "MED_E", geo == input$country)
+  inc_mean_self <- data$inc_mean %>% 
+    filter(geo == input$country, time >= "2005-01-01")
+  inc_med_self <- data$inc_med %>% 
+    filter(geo == input$country, time >= "2005-01-01")
+  
+  inc_mean <- data$inc_mean %>% 
+    filter(geo %in% neighbours[[input$country]], time >= "2005-01-01")
+  inc_med <- data$inc_med %>% 
+    filter(geo %in% neighbours[[input$country]], time >= "2005-01-01")
+  
+  ggplot_inc <- ggplot(inc_mean_self, aes(x = time, colour = geo)) +
+    scale_color_manual(values = rev(teals)) +
+    geom_ribbon(data = inc_mean,
+                aes(ymin = inc_mean$values, ymax = inc_med$values), 
+                fill = rgb(0.2, 0.2, 0.2, 0.1)) +
+    geom_ribbon(aes(ymin = inc_mean_self$values, ymax = inc_med_self$values),
+                colour = "#aa2020", fill = rgb(0, 0, 0, 0)) +
+    geom_ribbon(aes(ymin = inc_mean_self$values, ymax = inc_med_self$values), 
+                fill = "#aa2020", alpha = 0.2) +
+    scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y")) +
+    scale_y_continuous(labels = scales::number_format(), expand = c(0, 0)) +
+    theme(
+      axis.title = element_blank(),
+      legend.position = "right",
+      legend.justification = "center",
+      legend.background = element_blank(),
+      legend.title = element_blank(),
+      panel.background = element_blank(),
+      panel.grid.major.x = element_blank(),
+      panel.grid.major.y = element_line(colour = rgb(0.85, 0.85, 0.85), size = 0.2),
+      panel.grid.minor = element_blank(),
+      plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "lines"))
 
-ggplot_inc <- data$inc %>% 
-  filter(indic_il == "MED_E", geo %in% neighbours[[input$country]]) %>%
-  ggplot(aes(x = time, y = values, colour = geo)) +
-  geom_line() +
-  scale_colour_grey() +
-  geom_line(data = inc_country, colour = "#008080") +
-  scale_x_date(expand = c(0, 0), 
-               labels = scales::date_format("%Y")) +
-  scale_y_continuous(labels = scales::number_format(),
-                     expand = c(0, 0)) +
-  theme(
-    axis.title = element_blank(),
-    legend.position = "right",
-    legend.justification = "center",
-    legend.background = element_blank(),
-    legend.title = element_blank(),
-    panel.background = element_blank(),
-    panel.grid.major.x = element_blank(),
-    panel.grid.major.y = element_line(colour = rgb(0.85, 0.85, 0.85), size = 0.2),
-    panel.grid.minor = element_blank(),
-    plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "lines"))
-
-ggplotly(ggplot_inc, tooltip = "text") %>% 
-  plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
-  layout(legend = list(orientation = "v", yanchor = "center", y = 0.6))
+  ggplotly(ggplot_inc, tooltip = "geo") %>% 
+    plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
+    layout(legend = list(orientation = "v", yanchor = "center", y = 0.6))
 })
-
-plot_section1_a <- plot_section1_b <- renderPlotly({
-             req(input$country)
-             
-             # To-do: filter data close to the selection (maybe ranks?)
-             # gini_sel <- filter(data, country == input$country)$gini
-             
-             # To-do: order data properly
-               # gini_comp <- data %>%
-               #   filter(year == max(year)) %>% 
-               #   arrange(gini) %>% 
-               #   mutate(country = factor(country))
-               # 
-               # gini_comp %>% 
-               #   plot_ly(x = ~gini, y = ~country,
-               #           text = ~sprintf("%s: %.2f", country, gini),
-               #           marker = list(color = "#008080", line = NULL), 
-               #           height = 250, type = "bar", hoverinfo = "text",
-               #           orientation = "h") %>% 
-               #   plotly::layout(margin = list(l = 20, b = 60),
-               #                  xaxis = list(titlefont = list(family = "Arial",
-               #                                                size = 14,
-               #                                                color = "rgb(68, 68, 68)"),
-               #                               tickfont = list(family = "Arial", 
-               #                                               size = 12),
-               #                               title = sprintf("Gini of %s", input$country)),
-               #                  yaxis = list(type = "category",
-               #                               categoryorder = "ascending",
-               #                               tickfont = list(family = "Arial", 
-               #                                               size = 12),
-               #                               title = ""),
-               #                  showlegend = FALSE) %>% 
-               #   plotly::config(displaylogo = FALSE, collaborate = FALSE)
-           })
 
 plot_map <- renderPlotly({
   map_poverty %>% 
@@ -234,9 +210,9 @@ plot_map <- renderPlotly({
 # First row of section 1, one full-width card
 tags$div(class = "card mb-2", id = "section1",
   tags$div(class = "card-header",
-           HTML("Income over Time")),
+           HTML("Mean and median incomes over time")),
   tags$div(class = "card-body",
-           HTML("Mean and median incomes...")),
+           HTML("The distance between mean and median income indicates skewedness of the income distribution.")),
   tags$div(class = "card-body",
   plot_inc)
 )
@@ -249,13 +225,6 @@ tags$div(class = "row", id = "section2",
            HTML("Display reactive text")),
   tags$div(class = "card-body",
            htmlOutput("info1")))),
-  # tags$div(class = "col-sm-4",
-  # tags$div(class = "card", 
-  # tags$div(class = "card-header",
-  #          HTML("Display nice plots")),
-  # tags$div(class = "card-body",
-  #          style = "height: 300px;",
-  #          plot_section1_a))),
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",

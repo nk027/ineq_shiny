@@ -57,6 +57,12 @@ data$pov_reg <- data$pov_reg %>%
   # percentage
   filter(unit == "PC")
 
+# extra
+data$inc_mean <- data$inc %>% 
+  filter(indic_il == "MEI_E")
+data$inc_med <- data$inc %>% 
+  filter(indic_il == "MED_E")
+
 saveRDS(data, "data/eurostat.rds")
 
 # Map ---------------------------------------------------------------------
@@ -67,35 +73,43 @@ map <- inner_join(shp, data$pov_reg, by = c("NUTS_ID" = "geo"))
 map <- map %>% 
   filter(time == max(map$time)) %>% 
   select(values, geo)
+
 saveRDS(map, "data/poverty_map.rds")
   
-map %>%   
-  plot_ly(name = "Poverty Rate",
-          split = ~geo, color = ~values, 
-          text = ~paste(geo, "\n", values),
-          hoverinfo = "text", hoveron = "fill",
-          alpha = 1, showlegend = FALSE) %>% 
-  layout(title = "Poverty Rate", 
-         xaxis = list(autorange = FALSE, range = c(-10, 30)), 
-         yaxis = list(autorange = FALSE, range = c(32, 70))) %>% 
-  colorbar(title = "in percent", ticksuffix = "%")
-
-# plot(pal = viridis::viridis_pal(), xlim = c(-8, 32), ylim = c(32, 72), 
-       # main = "Poverty Rates")
+# map %>%   
+#   plot_ly(name = "Poverty Rate",
+#           split = ~geo, color = ~values, 
+#           text = ~paste(geo, "\n", values),
+#           hoverinfo = "text", hoveron = "fill",
+#           alpha = 1, showlegend = FALSE) %>% 
+#   layout(title = "Poverty Rate", 
+#          xaxis = list(autorange = FALSE, range = c(-10, 30)), 
+#          yaxis = list(autorange = FALSE, range = c(32, 70))) %>% 
+#   colorbar(title = "in percent", ticksuffix = "%")
 
 
 # Income ------------------------------------------------------------------
 
-inc_country <- data$inc %>% 
-  filter(indic_il == "MED_E", geo == input$country)
+inc_mean_self <- data$inc_mean %>% 
+  filter(geo == input$country, time >= "2005-01-01")
+inc_med_self <- data$inc_med %>% 
+  filter(geo == input$country, time >= "2005-01-01")
 
-plot_inc <- data$inc %>% 
-  filter(indic_il == "MED_E", geo %in% neighbours[[input$country]]) %>%
-  ggplot(aes(x = time, y = values, colour = geo)) +
-  geom_line() +
-  scale_colour_grey() +
-  geom_line(data = inc_country, colour = "#008080") +
-  scale_x_date(expand = c(0, 0), 
+inc_mean <- data$inc_mean %>% 
+  filter(geo %in% neighbours[[input$country]], time >= "2005-01-01")
+inc_med <- data$inc_med %>% 
+  filter(geo %in% neighbours[[input$country]], time >= "2005-01-01")
+
+ggplot_inc <- ggplot(inc_mean_self, aes(x = time, colour = geo)) +
+  scale_color_manual(values = rev(c("#e4f1f1", "#c6e2e2", "#a4d1d1", "#7bbdbd", "#49a4a4", "#008080"))) +
+  geom_ribbon(data = inc_mean,
+              aes(ymin = inc_mean$values, ymax = inc_med$values), 
+              fill = rgb(0.2, 0.2, 0.2, 0.1)) +
+  geom_ribbon(aes(ymin = inc_mean_self$values, ymax = inc_med_self$values),
+              colour = "#aa2020", fill = rgb(0, 0, 0, 0)) +
+  geom_ribbon(aes(ymin = inc_mean_self$values, ymax = inc_med_self$values), 
+              fill = "#aa2020", alpha = 0.2) +
+  scale_x_date(expand = c(0, 0),
                labels = scales::date_format("%Y")) +
   scale_y_continuous(labels = scales::number_format(),
                      expand = c(0, 0)) +
@@ -111,6 +125,6 @@ plot_inc <- data$inc %>%
     panel.grid.minor = element_blank(),
     plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "lines"))
 
-ggplotly(plot_inc, tooltip = "text") %>% 
+ggplotly(ggplot_inc, tooltip = "geo") %>% 
   plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
   layout(legend = list(orientation = "v", yanchor = "center", y = 0.6))
