@@ -10,18 +10,6 @@ data <- lapply(codes, get_eurostat, stringsAsFactors = FALSE)
 names(data) <- names
 
 
-# Widget ------------------------------------------------------------------
-
-# Mean
-# Median
-# Gini
-# QSR
-# At-risk-of-poverty Threshold
-# At-risk-of-poverty Rate
-# Top 10% Share
-# Health
-
-
 # Plots -------------------------------------------------------------------
 
 # poverty risk over time
@@ -41,7 +29,7 @@ data$pov <- data$pov %>%
   filter(unit == "PC", indic_il == "LI_R_MD60", sex == "T", age == "TOTAL")
 data$quants <- data$quants %>% 
   # deciles, share of national equivalised income
-  filter(grepl("D[1-10]$", quantile), indic_il == "SHARE", currency == "EUR")
+  filter(grepl("D*", quantile), indic_il == "SHARE", currency == "EUR")
 data$qsr <- data$qsr %>% 
   filter(sex == "T", age == "TOTAL")
 data$gini <- data$gini %>% 
