@@ -81,15 +81,15 @@ silc.d <- rbind(silc.d.$`07`, silc.d.$`08`, silc.d.$`09`, silc.d.$`10`, silc.d.$
 
 
 # Save all data ------------------------------------------------------------------------------------------
-write_rds(silc.d, "./data/cz_hh_register.RDS")
-write_rds(silc.r, "./data/cz_ps_register.RDS")
-write_rds(silc.p, "./data/cz_ps_data.RDS")
-write_rds(silc.h, "./data/cz_hh_data.RDS")
+# write_rds(silc.d, "./data/cz_hh_register.RDS")
+# write_rds(silc.r, "./data/cz_ps_register.RDS")
+# write_rds(silc.p, "./data/cz_ps_data.RDS")
+# write_rds(silc.h, "./data/cz_hh_data.RDS")
 
 
 # Merging the data files -----------------------------------------------------------------------------------------------
 
-# Merge the Household files. HH-Data and HH-Register
+# Merge the Household files. HH-Data and HH-Register -------------------------------------------------------------------
 # Create hh-ID in register dataframe
 silc.d <- silc.d %>%
   mutate(id_h = paste0(db010, db020, db030))
@@ -101,8 +101,13 @@ silc.h <- silc.h %>%
 # merge hh data with hh register to add hh weights
 silc.hd <- left_join(silc.h, silc.d %>% select(id_h, db090))
 
+# Merge the personal files. Pers-Data and Pers-Register --------------------------------------------------------------
 
-# Merge the personal files. Pers-Data and Pers-Register
+# Filter out observations without personal ID (2016&2017)
+silc.p <- silc.p[which(!is.na(silc.p$pb030)),]
+silc.r <- silc.r[which(!is.na(silc.r$rb030)),]
+
+
 # generate personal ID. personal data dataframe
 silc.p <- silc.p %>%
   mutate(id_p = paste0(pb010, pb020, pb030))
@@ -114,8 +119,6 @@ silc.r <- silc.r %>%
 # generate household ID - id_h (merge with country code)
 silc.p <- silc.p %>%
   mutate(id_h = paste0(pb010, pb020, px030))
-
-
 # Merge Personal data and personal register, so all persons are included (also below 16 years of age)
 silc.pd <- right_join(silc.p, silc.r %>% select(id_p, rb050))
 
@@ -127,6 +130,8 @@ write_rds(silc.dat, "./data/cz_complete_data.RDS")
 
 # Cleanup
 rm(silc.d, silc.h, silc.hd, silc.p, silc.r, silc.pd)
+rm(silc.d., silc.h., silc.hd., silc.p., silc.r.)
+
 
 # Data Manipulation --------------------------------------------------------------------------------------------------
 
