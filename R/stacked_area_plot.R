@@ -17,13 +17,12 @@ input$quant <- "QU"
 deciles <- get_eurostat("ilc_di01")
 
 # Rewrite the date to year
-deciles$time <- year(deciles$time)
+# deciles$time <- year(deciles$time)
 
 # Filter the selected country, currency, and share of total income
 deciles <- deciles %>%
-  filter(geo == input$country) %>%
-  filter(currency == input$currency) %>%
-  filter(indic_il == "SHARE")
+  # filter(geo == input$country) %>%
+  filter(indic_il == "SHARE", currency == "EUR")
 
 # Filter Quantiles or Deciles
 deciles <- deciles %>%
@@ -35,6 +34,8 @@ if (input$quant== "D") {
 } else {
   deciles$quantile <- ordered(deciles$quantile, levels = c("QU5", "QU4", "QU3", "QU2", "QU1"))
 }
+
+saveRDS(deciles, "data/quantiles_stacked.rds")
 
 if (input$quant== "D") {
   input$type <- "deciles"
@@ -50,6 +51,4 @@ p <- ggplot(data = deciles, aes(x = deciles$time, y = deciles$values, fill = fac
   xlab("Year")
 
 ggplotly(p)
- 
-
 
