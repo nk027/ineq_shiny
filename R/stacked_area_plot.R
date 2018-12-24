@@ -28,14 +28,16 @@ deciles <- deciles %>%
 deciles <- deciles %>%
   filter(grepl(input$quant, deciles$quantile))
 
-levels(deciles$quantile) <- droplevels(deciles$quantile)
+deciles$quantile <- droplevels(deciles$quantile)
 if (input$quant== "D") {
   deciles$quantile <- ordered(deciles$quantile, levels = c("D10", "D9", "D8", "D7", "D6", "D5", "D4", "D3", "D2", "D1"))
 } else {
   deciles$quantile <- ordered(deciles$quantile, levels = c("QU5", "QU4", "QU3", "QU2", "QU1"))
 }
 
-saveRDS(deciles, "data/quantiles_stacked.rds")
+deciles %>% 
+  select(quantile, geo, time, values) %>% 
+saveRDS("data/quantiles_stacked.rds")
 
 if (input$quant== "D") {
   input$type <- "deciles"

@@ -31,6 +31,7 @@ countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG",
 neighbours <- readRDS("data/neighbours.rds") # Picks not yet ideal
 data_widget <- readRDS("data/widget.rds") # More indicators
 map_poverty <- readRDS("data/poverty_map.rds") # Maybe edit hover-info
+quantile_area <- readRDS("data/quantiles_stacked.rds")
 data <- readRDS("data/eurostat.rds") # Break this down
 ```
 
@@ -208,8 +209,7 @@ plot_inc <- renderPlotly({
 
   ggplotly(ggplot_inc, tooltip = "geo") %>% 
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
-    plotly::layout(title = names(countries)[countries == input$country],
-                   legend = list(orientation = "v", yanchor = "center", y = 0.6),
+    plotly::layout(legend = list(orientation = "v", yanchor = "center", y = 0.6),
                    yaxis = list(title = "Equivalised net income in EUR"))
 })
 
@@ -223,6 +223,24 @@ plot_map <- renderPlotly({
            yaxis = list(autorange = FALSE, range = c(32, 70))) %>% 
     colorbar(title = "in percent", ticksuffix = "%") %>% 
     plotly::config(displaylogo = FALSE, collaborate = FALSE)
+})
+
+plot_quantiles <- renderPlotly({
+  quantiles <- quantile_area %>% 
+    filter(geo == input$country) %>% 
+    reshape2::dcast(time ~ quantile)
+  
+  quant_st <- data.frame("time" = quantiles[1], 
+                         t(apply(quantiles[-1], 1, function(x) x / sum(x))))
+  
+  plot_ly(quant_st, x = ~time, y = ~QU1, name = "1st quintile", type = "bar", color = I(teals[6]), hoverinfo = "name") %>% 
+    add_trace(y = ~QU2, name = "2nd quintile", color = I(teals[4])) %>% 
+    add_trace(y = ~QU3, name = "3rd quintile", color = I(teals[3])) %>% 
+    add_trace(y = ~QU4, name = "4th quintile", color = I(teals[2])) %>% 
+    add_trace(y = ~QU5, name = "5th quintile", color = I(teals[1])) %>%  
+    plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
+    plotly::layout(legend = list(orientation = "v", yanchor = "center", y = 0.6),
+                   yaxis = list(title = "Cumulative Share in %"), barmode = "stack")
 })
 ```
 
@@ -256,9 +274,10 @@ tags$div(class = "row", id = "section2",
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
-           HTML("Display reactive text")),
+           HTML("Quantile shares over time")),
   tags$div(class = "card-body",
-           htmlOutput("info1")))),
+           style = "height: 400;",
+           plot_quantiles))),
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
