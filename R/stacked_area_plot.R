@@ -4,7 +4,6 @@ library(plotly)
 library(eurostat)
 library(lubridate)
 library(dplyr)
-library(tidyr)
 
 input <- list()
 input$country <- "AT"
