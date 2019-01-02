@@ -177,3 +177,8 @@ a.card:hover {
   .bg-darkblue-h:hover {
     background-color: #a7d3a7 !important;
   }
+
+/* Issue with Safari & Bootstrap rows, see https://stackoverflow.com/questions/44099562/ */
+.row:before, row:after {
+    display: inline-block;
+}
