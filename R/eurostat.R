@@ -59,7 +59,7 @@ shp <- get_eurostat_geospatial(nuts_level = "all")
 map <- inner_join(shp, data$pov_reg, by = c("NUTS_ID" = "geo"))
 
 map <- map %>% 
-  filter(time == max(map$time)) %>% 
+  filter(time == "2016-01-01") %>% 
   select(values, geo)
 
 saveRDS(map, "data/poverty_map.rds")

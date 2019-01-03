@@ -86,8 +86,8 @@ output$med_inc <- renderText(
          digits = 5, big.mark = ",")
 )
 output$gini <- renderText(
-  format(data_widget$gini$values[data_widget$gini$country == input$country], 
-         digits = 3, big.mark = ",")
+  format(data_widget$gini$values[data_widget$gini$country == input$country] / 100, 
+         digits = 2, big.mark = ",")
 )
 output$qsr80 <- renderText(
   format(data_widget$qsr$values[data_widget$qsr$country == input$country], 
@@ -136,6 +136,12 @@ tags$div(
 )
 tags$div(
   class = "row row-tight my-2 mb-2",
+    html_overview(
+    title = "Top 10% Income Share",
+    number = textOutput("top10", inline = FALSE),
+    units = "(in percent)",
+    color = "bg-yellow",
+    href_id = "section2"),
   html_overview(
     title = "Poverty-risk Rate",
     number = textOutput("pov", inline = FALSE),
@@ -147,12 +153,6 @@ tags$div(
     number = textOutput("pov_th", inline = FALSE),
     units = "(in EUR)",
     color = "bg-darkblue",
-    href_id = "section2"),
-  html_overview(
-    title = "Top 10% Income Share",
-    number = textOutput("top10", inline = FALSE),
-    units = "(in percent)",
-    color = "bg-yellow",
     href_id = "section2")
 )
 ```
@@ -231,9 +231,10 @@ plot_quantiles <- renderPlotly({
     reshape2::dcast(time ~ quantile)
   
   quant_st <- data.frame("time" = quantiles[1], 
-                         t(apply(quantiles[-1], 1, function(x) x / sum(x))))
+                         t(apply(quantiles[-1], 1, function(x) round(x / sum(x), 3))))
   
-  plot_ly(quant_st, x = ~time, y = ~QU1, name = "1st", type = "bar", color = I(teals[6]), hoverinfo = "name") %>% 
+  plot_ly(quant_st, x = ~time, y = ~QU1, name = "1st", type = "bar", color = I(teals[6]), 
+          hoverinfo = "value") %>% 
     add_trace(y = ~QU2, name = "2nd", color = I(teals[4])) %>% 
     add_trace(y = ~QU3, name = "3rd", color = I(teals[3])) %>% 
     add_trace(y = ~QU4, name = "4th", color = I(teals[2])) %>% 
@@ -274,14 +275,14 @@ tags$div(class = "row", id = "section2",
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
-           HTML("Quantile shares over time")),
+           HTML("Quintile shares over time")),
   tags$div(class = "card-body",
            style = "height: 400;",
            plot_quantiles))),
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
-           HTML("At-risk-of-poverty rates across Europe")),
+           HTML("At-risk-of-poverty rates across Europe, 2016")),
   tags$div(class = "card-body",
            style = "height: 400;",
            plot_map)))
@@ -290,7 +291,7 @@ tags$div(class = "row", id = "section2",
 # Footer
 tags$div(class = "mb-4", id = "footer",
   tags$h4(class = "color-yellow mb-2",
-          HTML("Imprint")),
+          HTML("<br> Imprint")),
   tags$div(class = "row mt-4 mb-4",
   tags$div(class = "col-sm-12",
   tags$div(class = "footer",
