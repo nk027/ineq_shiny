@@ -131,7 +131,7 @@ tags$div(
   html_overview(
     title = "Quantile Share Ratio",
     number = textOutput("qsr80", inline = FALSE),
-    units = "(80 to 20)",
+    units = "(Top vs bottom 20%)",
     color = "bg-yellow",
     href_id = "section2")
 )

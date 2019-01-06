@@ -18,7 +18,8 @@ gini <- get_eurostat("ilc_di12")
 
 # Country subset
 gini <- gini %>%
-  filter(geo == input$country) %>% 
+  #filter(geo == input$country) %>% 
+  mutate(values = values / 100) %>% 
   select(geo, time, values)
 
 saveRDS(gini, "data/gini.rds")
