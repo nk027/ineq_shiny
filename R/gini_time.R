@@ -14,11 +14,14 @@ input$year <- 2017
 gini <- get_eurostat("ilc_di12")
 
 # Rewrite the date to year
-gini$time <- year(gini$time)
+# gini$time <- year(gini$time)
 
 # Country subset
 gini <- gini %>%
-  filter(geo == input$country)
+  filter(geo == input$country) %>% 
+  select(geo, time, values)
+
+saveRDS(gini, "data/gini.rds")
 
 p <- plot_ly(gini, x = ~time, y = ~values, type = "scatter", mode = "lines") %>%
   layout(title = "Gini index over time", 

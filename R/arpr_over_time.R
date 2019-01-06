@@ -21,15 +21,18 @@ input$threshold <- "LI_R_MD60"
 arpr <- get_eurostat("ilc_li02")
 
 # Rewrite the date to year
-arpr$time <- year(arpr$time)
+# arpr$time <- year(arpr$time)
 
 # Country subset
 arpr <- arpr %>%
-  filter(geo == input$country,
+  filter(#geo == input$country,
          unit == input$value,
          indic_il == input$threshold,
          age == "TOTAL",
-         sex == "T")
+         sex == "T") %>% 
+  select(geo, time, values)
+
+saveRDS(arpr, "data/arpr.rds")
 
 p <- plot_ly(arpr, x = ~time, y = ~values, type = "scatter", mode = "lines") %>%
   layout(title = "At risk of poverty rate over time", 

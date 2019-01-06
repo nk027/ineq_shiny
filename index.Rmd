@@ -16,10 +16,10 @@ library(dplyr)
 library(plotly)
 library(ggplot2)
 
-teals <- c("#c6e2e2", "#a4d1d1", "#7bbdbd", "#49a4a4", "#008080", "#007373")
 viris <- c("#21908CFF", "#27AD81FF", "#5DC863FF", "#AADC32FF", "#FDE725FF")
 viris_full <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
-#viridis::viridis(5, begin = 0.5)
+# generated via:
+# viridis::viridis(5, begin = 0)
 
 # Data
 countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG", 
@@ -31,11 +31,14 @@ countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG",
                "Poland" = "PL", "Portugal" = "PT", "Romania" = "RO",
                "Sweden" = "SE", "Slovenia" = "SI", "Slovakia" = "SK",
                "United Kingdom" = "UK")
+# These are handpicked, as we do not handle all countries present in the data
 neighbours <- readRDS("data/neighbours.rds") # Picks not yet ideal
-data_widget <- readRDS("data/widget.rds") # More indicators
-map_poverty <- readRDS("data/poverty_map.rds") # Maybe edit hover-info
+data_widget <- readRDS("data/widget.rds")
+map_poverty <- readRDS("data/poverty_map.rds")
 quantile_area <- readRDS("data/quantiles_stacked.rds")
-data <- readRDS("data/eurostat.rds") # Break this down
+arpr <- readRDS("data/arpr.rds")
+gini <- readRDS("data/gini.rds")
+data <- readRDS("data/eurostat.rds") # Break this down, atm only inc_mean & inc_med used
 ```
 
 ```{r, echo=FALSE}
@@ -73,12 +76,6 @@ html_overview <- function(title, number, units, color, href_id) {
   )
   return(out)
 }
-
-# Prepare Values to be displayed
-  # We still need:
-  # req(input) somewhere, &
-  # isolate() others
-  # to minimise operations
 
 output$mean_inc <- renderText(
   format(data_widget$mean_inc$values[data_widget$mean_inc$country == input$country], 
@@ -165,18 +162,6 @@ tags$div(
 # Functions and stuff
 #
 
-output$info1 <- renderText({
-  req(input$country)
-  
-  text_data <- data_widget$pov %>% 
-    filter(country == input$country) %>% 
-    select(values)
-  improved <- text_data < 15
-  # To-do: Think of some text to generate
-  sprintf("%s has a relatively %s at-risk-of-poverty rate!", isolate({input$country}),
-          ifelse(improved, "low (<15%)", "high (>15%)"))
-})
-
 plot_inc <- renderPlotly({
   req(input$country)
   
@@ -191,12 +176,11 @@ plot_inc <- renderPlotly({
     filter(geo %in% neighbours[[input$country]])
   
   ggplot_inc <- ggplot(inc_mean_self, aes(x = time)) +
-    # scale_color_manual(values = rev(teals)) +
     scale_color_manual(values = viris) +
     geom_line(data = inc_mean, aes(colour = geo, y = values)) +
     geom_line(data = inc_med, aes(colour = geo, y = values), linetype = 3) +
-    geom_line(data = inc_mean_self, aes(y = values), colour = "#aa2020") +
-    geom_line(data = inc_med_self, aes(y = values), colour = "#aa2020", linetype = 3) +
+    geom_line(data = inc_mean_self, aes(y = values), colour = viris_full[1]) +
+    geom_line(data = inc_med_self, aes(y = values), colour = viris_full[1], linetype = 3) +
     scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y")) +
     scale_y_continuous(labels = scales::number_format(), expand = c(0, 0)) +
     theme(
@@ -235,7 +219,7 @@ plot_quantiles <- renderPlotly({
     reshape2::dcast(time ~ quantile)
   
   quant_st <- data.frame("time" = quantiles[1], 
-                         t(apply(quantiles[-1], 1, function(x) round(x / sum(x), 3))))
+                         t(apply(quantiles[-1], 1, function(x) round(x / sum(x), 3) * 100)))
   
   plot_ly(quant_st, x = ~time, y = ~QU1, name = "1st", type = "bar", color = I(viris_full[5]), 
           hoverinfo = "value") %>% 
@@ -245,26 +229,36 @@ plot_quantiles <- renderPlotly({
     add_trace(y = ~QU5, name = "5th", color = I(viris_full[1])) %>%  
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
     plotly::layout(legend = list(orientation = "v", yanchor = "center", y = 0.6),
-                   yaxis = list(title = "Cumulative Share in %"), barmode = "stack")
+                   xaxis = list(title = "Year"),
+                   yaxis = list(title = "Cumulative share in %"), 
+                   barmode = "stack")
+})
+
+plot_arpr <- renderPlotly({
+  arpr %>% 
+    filter(geo == input$country) %>% 
+    plot_ly(x = ~time, y = ~values, type = "scatter", mode = "lines", color = I(viris_full[1])) %>%
+    plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
+    layout(xaxis = list(title = "Year"),
+           yaxis = list(title = "At-risk-of-poverty rate in %"))
+})
+
+plot_gini <- renderPlotly({
+  gini %>% 
+    filter(geo == input$country) %>% 
+    plot_ly(x = ~time, y = ~values, type = "scatter", mode = "lines", color = I(viris_full[1])) %>%
+    plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
+    layout(xaxis = list(title = "Year"),
+           yaxis = list(title = "Gini index"))
 })
 ```
 
 
 ```{r, echo=FALSE}
 #
-# Section 1
+# Row 1
 #
-
-# Header for section #1
-# tags$div(class = "mb-4", id = "section1",
-#   tags$h1(class = "color-yellow mb-2",
-#           HTML("Section #1")),
-#   tags$div(class = "row mt-4 mb-4",
-#   tags$div(class = "col-sm-12",
-#            HTML("Some information about indicators in section #1.")))
-# )
-
-# First row of section 1, one full-width card
+# one full-width card
 tags$div(class = "card mb-2", id = "section1",
   tags$div(class = "card-header",
            HTML("Mean and median incomes over time")),
@@ -274,8 +268,11 @@ tags$div(class = "card mb-2", id = "section1",
   plot_inc)
 )
 
-# Second row of section 1, three cards beside each other
-tags$div(class = "row", id = "section2",
+#
+# Row 2
+#
+# two cards beside each other
+tags$div(class = "row mb-2", id = "section2",
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
@@ -286,6 +283,27 @@ tags$div(class = "row", id = "section2",
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
+           HTML("Gini index over time")),
+  tags$div(class = "card-body",
+           style = "height: 400;",
+           plot_gini)))
+)
+
+#
+# Row 3
+#
+# two cards beside each other
+tags$div(class = "row mb-2", id = "section3",
+  tags$div(class = "col-sm-6",
+  tags$div(class = "card", 
+  tags$div(class = "card-header",
+           HTML("At-risk-of-poverty rate over time")),
+  tags$div(class = "card-body",
+           style = "height: 400;",
+           plot_arpr))),
+  tags$div(class = "col-sm-6",
+  tags$div(class = "card", 
+  tags$div(class = "card-header",
            HTML("At-risk-of-poverty rates across Europe, 2016")),
   tags$div(class = "card-body",
            style = "height: 400;",
@@ -293,7 +311,7 @@ tags$div(class = "row", id = "section2",
 )
 
 # Footer
-tags$div(class = "mb-4", id = "footer",
+tags$div(class = "mt-2", id = "footer",
   tags$h4(class = "color-yellow mb-2",
           HTML("<br> Imprint")),
   tags$div(class = "row mt-4 mb-4",
