@@ -127,7 +127,7 @@ tags$div(
     number = textOutput("gini", inline = FALSE),
     units = "(0 to 1)",
     color = "bg-darkblue",
-    href_id = "section1"),
+    href_id = "section2"),
   html_overview(
     title = "Quantile Share Ratio",
     number = textOutput("qsr80", inline = FALSE),
@@ -148,13 +148,13 @@ tags$div(
     number = textOutput("pov", inline = FALSE),
     units = "(in percent)",
     color = "bg-purple",
-    href_id = "section2"),
+    href_id = "section3"),
   html_overview(
     title = "Poverty-risk Threshold",
     number = textOutput("pov_th", inline = FALSE),
     units = "(in EUR)",
     color = "bg-darkblue",
-    href_id = "section2")
+    href_id = "section3")
 )
 ```
 
