@@ -33,12 +33,13 @@ countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG",
                "United Kingdom" = "UK")
 # These are handpicked, as we do not handle all countries present in the data
 neighbours <- readRDS("data/neighbours.rds") # Picks not yet ideal
-data_widget <- readRDS("data/widget.rds")
-map_poverty <- readRDS("data/poverty_map.rds")
-quantile_area <- readRDS("data/quantiles_stacked.rds")
+widget <- readRDS("data/widget.rds")
+map <- readRDS("data/map.rds")
+quantile_stack <- readRDS("data/quantile_stack.rds")
 arpr <- readRDS("data/arpr.rds")
 gini <- readRDS("data/gini.rds")
-data <- readRDS("data/eurostat.rds") # Break this down, atm only inc_mean & inc_med used
+inc_mean <- readRDS("data/inc_mean.rds")
+inc_med <- readRDS("data/inc_med.rds")
 ```
 
 ```{r, echo=FALSE}
@@ -78,31 +79,31 @@ html_overview <- function(title, number, units, color, href_id) {
 }
 
 output$mean_inc <- renderText(
-  format(data_widget$mean_inc$values[data_widget$mean_inc$country == input$country], 
+  format(widget$mean_inc$values[widget$mean_inc$country == input$country], 
          digits = 5, big.mark = ",")
 )
 output$med_inc <- renderText(
-  format(data_widget$med_inc$values[data_widget$med_inc$country == input$country], 
+  format(widget$med_inc$values[widget$med_inc$country == input$country], 
          digits = 5, big.mark = ",")
 )
 output$gini <- renderText(
-  format(data_widget$gini$values[data_widget$gini$country == input$country] / 100, 
+  format(widget$gini$values[widget$gini$country == input$country] / 100, 
          digits = 2, big.mark = ",")
 )
 output$qsr80 <- renderText(
-  format(data_widget$qsr$values[data_widget$qsr$country == input$country], 
+  format(widget$qsr$values[widget$qsr$country == input$country], 
          digits = 3, big.mark = ",")
 )
 output$pov <- renderText(
-  format(data_widget$pov$values[data_widget$pov$country == input$country], 
+  format(widget$pov$values[widget$pov$country == input$country], 
          digits = 3, big.mark = ",")
 )
 output$pov_th <- renderText(
-  format(data_widget$pov_th$values[data_widget$pov_th$country == input$country], 
+  format(widget$pov_th$values[widget$pov_th$country == input$country], 
          digits = 3, big.mark = ",")
 )
 output$top10 <- renderText(
-  format(data_widget$top10$values[data_widget$top10$country == input$country], 
+  format(widget$top10$values[widget$top10$country == input$country], 
          digits = 3, big.mark = ",")
 )
 
@@ -165,14 +166,14 @@ tags$div(
 plot_inc <- renderPlotly({
   req(input$country)
   
-  inc_mean_self <- data$inc_mean %>% 
+  inc_mean_self <- inc_mean %>% 
     filter(geo == input$country)
-  inc_med_self <- data$inc_med %>% 
+  inc_med_self <- inc_med %>% 
     filter(geo == input$country)
   
-  inc_mean <- data$inc_mean %>% 
+  inc_mean <- inc_mean %>% 
     filter(geo %in% neighbours[[input$country]])
-  inc_med <- data$inc_med %>% 
+  inc_med <- inc_med %>% 
     filter(geo %in% neighbours[[input$country]])
   
   ggplot_inc <- ggplot(inc_mean_self, aes(x = time)) +
@@ -202,7 +203,7 @@ plot_inc <- renderPlotly({
 })
 
 plot_map <- renderPlotly({
-  map_poverty %>% 
+  map %>% 
     plot_ly(split = ~geo, color = ~values, 
             text = ~paste(geo, "\n", values),
             hoverinfo = "text", hoveron = "fill",
@@ -214,7 +215,7 @@ plot_map <- renderPlotly({
 })
 
 plot_quantiles <- renderPlotly({
-  quantiles <- quantile_area %>% 
+  quantiles <- quantile_stack %>% 
     filter(geo == input$country) %>% 
     reshape2::dcast(time ~ quantile)
   
@@ -311,7 +312,7 @@ tags$div(class = "row mb-2", id = "section3",
 )
 
 # Footer
-tags$div(class = "mt-2", id = "footer",
+tags$div(class = "mb-2", id = "footer",
   tags$h4(class = "color-yellow mb-2",
           HTML("<br> Imprint")),
   tags$div(class = "row mt-4 mb-4",
