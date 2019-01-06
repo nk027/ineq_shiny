@@ -10,11 +10,20 @@ html, body {
   font-family: "Noto Sans", sans-serif;
   background-color: #F7F7F7;
 }
-h1, h2, h3, h4, h5 {
+h1, h2, h3 {
   color: #444;
   font-size: 2.5rem;
   font-weight: bold;
   font-family: "Merriweather", serif;
+}
+h4, h5 {
+  color: #444;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: "Merriweather", serif;
+}
+.footer {
+  font-size: 10px;
 }
 
 .main-container {
@@ -168,3 +177,8 @@ a.card:hover {
   .bg-darkblue-h:hover {
     background-color: #a7d3a7 !important;
   }
+
+/* Issue with Safari & Bootstrap rows, see https://stackoverflow.com/questions/44099562/ */
+.row:before, row:after {
+    display: inline-block;
+}

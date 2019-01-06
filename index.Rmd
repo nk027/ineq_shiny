@@ -17,6 +17,9 @@ library(plotly)
 library(ggplot2)
 
 teals <- c("#c6e2e2", "#a4d1d1", "#7bbdbd", "#49a4a4", "#008080", "#007373")
+viris <- c("#21908CFF", "#27AD81FF", "#5DC863FF", "#AADC32FF", "#FDE725FF")
+viris_full <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
+#viridis::viridis(5, begin = 0.5)
 
 # Data
 countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG", 
@@ -86,8 +89,8 @@ output$med_inc <- renderText(
          digits = 5, big.mark = ",")
 )
 output$gini <- renderText(
-  format(data_widget$gini$values[data_widget$gini$country == input$country], 
-         digits = 3, big.mark = ",")
+  format(data_widget$gini$values[data_widget$gini$country == input$country] / 100, 
+         digits = 2, big.mark = ",")
 )
 output$qsr80 <- renderText(
   format(data_widget$qsr$values[data_widget$qsr$country == input$country], 
@@ -132,28 +135,28 @@ tags$div(
     number = textOutput("qsr80", inline = FALSE),
     units = "(80 to 20)",
     color = "bg-yellow",
-    href_id = "section1")
+    href_id = "section2")
 )
 tags$div(
   class = "row row-tight my-2 mb-2",
+    html_overview(
+    title = "Top 10% Income Share",
+    number = textOutput("top10", inline = FALSE),
+    units = "(in percent)",
+    color = "bg-yellow",
+    href_id = "section2"),
   html_overview(
     title = "Poverty-risk Rate",
     number = textOutput("pov", inline = FALSE),
     units = "(in percent)",
     color = "bg-purple",
-    href_id = "section1"),
+    href_id = "section2"),
   html_overview(
     title = "Poverty-risk Threshold",
     number = textOutput("pov_th", inline = FALSE),
     units = "(in EUR)",
     color = "bg-darkblue",
-    href_id = "section1"),
-  html_overview(
-    title = "Top 10% Income Share",
-    number = textOutput("top10", inline = FALSE),
-    units = "(in percent)",
-    color = "bg-yellow",
-    href_id = "section1")
+    href_id = "section2")
 )
 ```
 
@@ -188,7 +191,8 @@ plot_inc <- renderPlotly({
     filter(geo %in% neighbours[[input$country]])
   
   ggplot_inc <- ggplot(inc_mean_self, aes(x = time)) +
-    scale_color_manual(values = rev(teals)) +
+    # scale_color_manual(values = rev(teals)) +
+    scale_color_manual(values = viris) +
     geom_line(data = inc_mean, aes(colour = geo, y = values)) +
     geom_line(data = inc_med, aes(colour = geo, y = values), linetype = 3) +
     geom_line(data = inc_mean_self, aes(y = values), colour = "#aa2020") +
@@ -207,7 +211,7 @@ plot_inc <- renderPlotly({
       panel.grid.minor = element_blank(),
       plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), "lines"))
 
-  ggplotly(ggplot_inc, tooltip = "geo") %>% 
+  ggplotly(ggplot_inc) %>% 
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
     plotly::layout(legend = list(orientation = "v", yanchor = "center", y = 0.6),
                    yaxis = list(title = "Equivalised net income in EUR"))
@@ -219,7 +223,7 @@ plot_map <- renderPlotly({
             text = ~paste(geo, "\n", values),
             hoverinfo = "text", hoveron = "fill",
             alpha = 1, showlegend = FALSE) %>% 
-    layout(xaxis = list(autorange = FALSE, range = c(-10, 30)), 
+    layout(xaxis = list(autorange = FALSE, range = c(-10, 30), title = "(C) EuroGeographics for the administrative boundaries"), 
            yaxis = list(autorange = FALSE, range = c(32, 70))) %>% 
     colorbar(title = "in percent", ticksuffix = "%") %>% 
     plotly::config(displaylogo = FALSE, collaborate = FALSE)
@@ -231,13 +235,14 @@ plot_quantiles <- renderPlotly({
     reshape2::dcast(time ~ quantile)
   
   quant_st <- data.frame("time" = quantiles[1], 
-                         t(apply(quantiles[-1], 1, function(x) x / sum(x))))
+                         t(apply(quantiles[-1], 1, function(x) round(x / sum(x), 3))))
   
-  plot_ly(quant_st, x = ~time, y = ~QU1, name = "1st quintile", type = "bar", color = I(teals[6]), hoverinfo = "name") %>% 
-    add_trace(y = ~QU2, name = "2nd quintile", color = I(teals[4])) %>% 
-    add_trace(y = ~QU3, name = "3rd quintile", color = I(teals[3])) %>% 
-    add_trace(y = ~QU4, name = "4th quintile", color = I(teals[2])) %>% 
-    add_trace(y = ~QU5, name = "5th quintile", color = I(teals[1])) %>%  
+  plot_ly(quant_st, x = ~time, y = ~QU1, name = "1st", type = "bar", color = I(viris_full[5]), 
+          hoverinfo = "value") %>% 
+    add_trace(y = ~QU2, name = "2nd", color = I(viris_full[4])) %>% 
+    add_trace(y = ~QU3, name = "3rd", color = I(viris_full[3])) %>% 
+    add_trace(y = ~QU4, name = "4th", color = I(viris_full[2])) %>% 
+    add_trace(y = ~QU5, name = "5th", color = I(viris_full[1])) %>%  
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
     plotly::layout(legend = list(orientation = "v", yanchor = "center", y = 0.6),
                    yaxis = list(title = "Cumulative Share in %"), barmode = "stack")
@@ -274,16 +279,29 @@ tags$div(class = "row", id = "section2",
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
-           HTML("Quantile shares over time")),
+           HTML("Quintile shares over time")),
   tags$div(class = "card-body",
            style = "height: 400;",
            plot_quantiles))),
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
-           HTML("At-risk-of-poverty rates across Europe")),
+           HTML("At-risk-of-poverty rates across Europe, 2016")),
   tags$div(class = "card-body",
            style = "height: 400;",
            plot_map)))
+)
+
+# Footer
+tags$div(class = "mb-4", id = "footer",
+  tags$h4(class = "color-yellow mb-2",
+          HTML("<br> Imprint")),
+  tags$div(class = "row mt-4 mb-4",
+  tags$div(class = "col-sm-12",
+  tags$div(class = "footer",
+           HTML("
+  Contact: shiny@kuschnig.eu <br>
+  Sources: Eurostat, (C) EuroGeographics for the administrative boundaries. <br>
+  Disclaimer: This document is based on data from Eurostat, EU Statistics on Income and Living Conditions. The responsibility for all conclusions drawn from the data lies entirely with the authors. <br>"))))
 )
 ```
