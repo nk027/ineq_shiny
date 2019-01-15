@@ -16,8 +16,8 @@ library(dplyr)
 library(plotly)
 library(ggplot2)
 
-viris <- rev(c("#21908CFF", "#1F9F88FF", "#27AD81FF", "#3EBC74FF", "#5DC863FF", 
-               "#82D34DFF", "#AADC32FF", "#D5E21AFF", "#FDE725FF"))
+viris <- rev(c( "#21908CFF", "#20A486FF", "#35B779FF", "#5DC863FF", "#8FD744FF", 
+                "#C7E020FF", "#FDE725FF"))
 viris_full <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
 # generated via:
 # viridis::viridis(5, begin = 0)
@@ -25,7 +25,7 @@ viris_full <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
 # Data
 countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG", 
                "Cyprus" = "CY", "Czech Republic" = "CZ", "Germany" = "DE",
-               "Denmark" = "DE", "Estonia" = "EE", "Greece" = "EL",
+               "Denmark" = "DK", "Estonia" = "EE", "Greece" = "EL",
                "Spain" = "ES", "Finland" = "FI", "France" = "FR", 
                "Croatia" = "HR", "Hungary" = "HU", "Italy" = "IT",
                "Lithuania" = "LT", "Latvia" = "LV", "Netherlands" = "NL",
