@@ -145,37 +145,34 @@ a.card:hover {
     right: 0px;
   }
 
-/* colour settings */
+/* colour settings
+red #aa2020 & #e4b9b9
+blue #004080 & #adc2d6
+green #008000 & #a7d3a7
+*/
   .color-white {
     color: #fff !important;
   }
   .bg-purple {
-    border-right-color: #aa2020;
-    border-bottom-color: #aa2020;
+    border-right-color: #008080;
+    border-bottom-color: #008080;
   }
   .bg-yellow {
-    border-right-color: #004080;
-    border-bottom-color: #004080;
-  }
-  .bg-brown {
-    border-right-color: #800080;
-    border-bottom-color: #800080;
+    border-right-color: #008080;
+    border-bottom-color: #008080;
   }
   .bg-darkblue {
-    border-right-color: #008000;
-    border-bottom-color: #008000;
+    border-right-color: #008080;
+    border-bottom-color: #008080;
   }
   .bg-purple-h:hover {
-    background-color: #e4b9b9 !important;
+    background-color: #cce5e5 !important;
   }
   .bg-yellow-h:hover {
-    background-color: #adc2d6 !important;
-  }
-  .bg-brown-h:hover {
-    background-color: #dab5da !important;
+    background-color: #cce5e5 !important;
   }
   .bg-darkblue-h:hover {
-    background-color: #a7d3a7 !important;
+    background-color: #cce5e5 !important;
   }
 
 /* Issue with Safari & Bootstrap rows, see https://stackoverflow.com/questions/44099562/ */

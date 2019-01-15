@@ -16,7 +16,8 @@ library(dplyr)
 library(plotly)
 library(ggplot2)
 
-viris <- c("#21908CFF", "#27AD81FF", "#5DC863FF", "#AADC32FF", "#FDE725FF")
+viris <- rev(c("#21908CFF", "#1F9F88FF", "#27AD81FF", "#3EBC74FF", "#5DC863FF", 
+               "#82D34DFF", "#AADC32FF", "#D5E21AFF", "#FDE725FF"))
 viris_full <- c("#440154FF", "#3B528BFF", "#21908CFF", "#5DC863FF", "#FDE725FF")
 # generated via:
 # viridis::viridis(5, begin = 0)
@@ -32,6 +33,7 @@ countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG",
                "Sweden" = "SE", "Slovenia" = "SI", "Slovakia" = "SK",
                "United Kingdom" = "UK")
 # These are handpicked, as we do not handle all countries present in the data
+
 neighbours <- readRDS("data/neighbours.rds") # Picks not yet ideal
 widget <- readRDS("data/widget.rds")
 map <- readRDS("data/map.rds")
