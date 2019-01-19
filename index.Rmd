@@ -27,14 +27,14 @@ countries <- c("Austria" = "AT", "Belgium" = "BE", "Bulgaria" = "BG",
                "Cyprus" = "CY", "Czech Republic" = "CZ", "Germany" = "DE",
                "Denmark" = "DK", "Estonia" = "EE", "Greece" = "EL",
                "Spain" = "ES", "Finland" = "FI", "France" = "FR", 
-               "Croatia" = "HR", "Hungary" = "HU", "Italy" = "IT",
-               "Lithuania" = "LT", "Latvia" = "LV", "Netherlands" = "NL",
-               "Poland" = "PL", "Portugal" = "PT", "Romania" = "RO",
-               "Sweden" = "SE", "Slovenia" = "SI", "Slovakia" = "SK",
-               "United Kingdom" = "UK")
+               "Croatia" = "HR", "Hungary" = "HU", "Ireland" = "IE",
+               "Italy" = "IT", "Lithuania" = "LT", "Latvia" = "LV", 
+               "Netherlands" = "NL", "Poland" = "PL", "Portugal" = "PT", 
+               "Romania" = "RO", "Sweden" = "SE", "Slovenia" = "SI", 
+               "Slovakia" = "SK", "Switzerland" = "CH", "United Kingdom" = "UK")
 # These are handpicked, as we do not handle all countries present in the data
 
-neighbours <- readRDS("data/neighbours.rds") # Picks not yet ideal
+neighbours <- readRDS("data/neighbours.rds")
 widget <- readRDS("data/widget.rds")
 map <- readRDS("data/map.rds")
 quantile_stack <- readRDS("data/quantile_stack.rds")
@@ -201,7 +201,7 @@ plot_inc <- renderPlotly({
   ggplotly(ggplot_inc) %>% 
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
     plotly::layout(legend = list(orientation = "v", yanchor = "center", y = 0.6),
-                   yaxis = list(title = "Equivalised net income in EUR"))
+                   yaxis = list(title = "Equivalised net income in EUR", rangemode = "tozero"))
 })
 
 plot_map <- renderPlotly({
@@ -243,7 +243,7 @@ plot_arpr <- renderPlotly({
     plot_ly(x = ~time, y = ~values, type = "scatter", mode = "lines", color = I(viris_full[1])) %>%
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
     layout(xaxis = list(title = "Year"),
-           yaxis = list(title = "At-risk-of-poverty rate in %"))
+           yaxis = list(title = "At-risk-of-poverty rate in %", range = c(0, 30)))
 })
 
 plot_gini <- renderPlotly({
@@ -252,7 +252,7 @@ plot_gini <- renderPlotly({
     plot_ly(x = ~time, y = ~values, type = "scatter", mode = "lines", color = I(viris_full[1])) %>%
     plotly::config(displaylogo = FALSE, collaborate = FALSE) %>% 
     layout(xaxis = list(title = "Year"),
-           yaxis = list(title = "Gini index"))
+           yaxis = list(title = "Gini index", range = c(0, 0.5)))
 })
 ```
 
