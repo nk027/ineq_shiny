@@ -4,7 +4,7 @@ library(dplyr)
 names <- c("pov_th", "pov", "quants", "qsr", "gini", 
            "inc", "hlth", "pov_reg")
 codes <- c("ilc_li01", "ilc_li02", "ilc_di01", "ilc_di11", "ilc_di12", 
-           "ilc_di13", "ilc_lk11", "ilc_li41")
+           "ilc_di03", "ilc_lk11", "ilc_li41")
 
 data <- lapply(codes, get_eurostat, stringsAsFactors = FALSE)
 names(data) <- names
@@ -62,7 +62,7 @@ map <- map %>%
   filter(time == "2016-01-01") %>% 
   select(values, geo)
 
-saveRDS(map, "data/poverty_map.rds")
+saveRDS(map, "data/map.rds")
   
 # map %>%   
 #   plot_ly(name = "Poverty Rate",
@@ -77,6 +77,11 @@ saveRDS(map, "data/poverty_map.rds")
 
 
 # Income ------------------------------------------------------------------
+
+data$inc_mean %>% select(geo, time, values) %>% 
+  saveRDS("data/inc_mean.rds")
+data$inc_med %>% select(geo, time, values) %>% 
+  saveRDS("data/inc_med.rds")
 
 inc_mean_self <- data$inc_mean %>% 
   filter(geo == input$country, time >= "2005-01-01")
