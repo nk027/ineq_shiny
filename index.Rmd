@@ -266,7 +266,7 @@ tags$div(class = "card mb-2", id = "section1",
   tags$div(class = "card-header",
            HTML("Mean and median incomes over time")),
   tags$div(class = "card-body",
-           HTML("The distance between mean and median (dotted) income indicates skewedness of the income distribution.")),
+           HTML("The equivalised net (or disposable) income (after social transfers) is the total income of households after tax and other deductions, that is available for spending or saving, divided by the number of household members.")),
   tags$div(class = "card-body",
   plot_inc)
 )
@@ -281,12 +281,17 @@ tags$div(class = "row mb-2", id = "section2",
   tags$div(class = "card-header",
            HTML("Quintile shares over time")),
   tags$div(class = "card-body",
+           HTML("Quantile shares are the shares of total income earned by subgroups of the population, divided by quantiles. E.g. the fifth or top quintile's share is the share of income received by the 20% with the highest income. <br>
+The quantile share ratio is the ratio of total income received by the top quintile (the 20% with the highest income) to that received by the bottom quintile.")),
+  tags$div(class = "card-body",
            style = "height: 400;",
            plot_quantiles))),
   tags$div(class = "col-sm-6",
   tags$div(class = "card", 
   tags$div(class = "card-header",
            HTML("Gini index over time")),
+  tags$div(class = "card-body",
+           HTML("The Gini coefficient is a measure of statistical dispersion and is calculated for equivalised disposable income, after social transfers.")),
   tags$div(class = "card-body",
            style = "height: 400;",
            plot_gini)))
@@ -302,6 +307,8 @@ tags$div(class = "row mb-2", id = "section3",
   tags$div(class = "card-header",
            HTML("At-risk-of-poverty rate over time")),
   tags$div(class = "card-body",
+           HTML("The at-risk-of-poverty rate is the share of people with an equivalised disposable income (after social transfers) below the at-risk-of-poverty threshold.")),
+  tags$div(class = "card-body",
            style = "height: 400;",
            plot_arpr))),
   tags$div(class = "col-sm-6",
@@ -309,7 +316,9 @@ tags$div(class = "row mb-2", id = "section3",
   tags$div(class = "card-header",
            HTML("At-risk-of-poverty rates across Europe, 2016")),
   tags$div(class = "card-body",
-           style = "height: 400;",
+           HTML("The at-risk-of-poverty threshold is set at 60% of the national median equivalised income (after social transfers).")),
+  tags$div(class = "card-body",
+           style = "height: 450;",
            plot_map)))
 )
 
@@ -322,7 +331,7 @@ tags$div(class = "mb-2", id = "footer",
   tags$div(class = "footer",
            HTML("
   Contact: shiny@kuschnig.eu <br>
-  Sources: Eurostat, (C) EuroGeographics for the administrative boundaries. <br>
+  Sources: Eurostat, Eurostat Statistics Explained, (C) EuroGeographics for the administrative boundaries <br>
   Disclaimer: This document is based on data from Eurostat, EU Statistics on Income and Living Conditions. The responsibility for all conclusions drawn from the data lies entirely with the authors. <br>"))))
 )
 ```
