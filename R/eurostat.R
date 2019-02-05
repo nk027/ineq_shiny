@@ -79,8 +79,10 @@ saveRDS(map, "data/map.rds")
 # Income ------------------------------------------------------------------
 
 data$inc_mean %>% select(geo, time, values) %>% 
+  transmute(Country = geo, Date = time, Value = values) %>% 
   saveRDS("data/inc_mean.rds")
 data$inc_med %>% select(geo, time, values) %>% 
+  transmute(Country = geo, Date = time, Value = values) %>% 
   saveRDS("data/inc_med.rds")
 
 inc_mean_self <- data$inc_mean %>% 

@@ -169,21 +169,21 @@ plot_inc <- renderPlotly({
   req(input$country)
   
   inc_mean_self <- inc_mean %>% 
-    filter(geo == input$country)
+    filter(Country == input$country)
   inc_med_self <- inc_med %>% 
-    filter(geo == input$country)
+    filter(Country == input$country)
   
   inc_mean <- inc_mean %>% 
-    filter(geo %in% neighbours[[input$country]])
+    filter(Country %in% neighbours[[input$country]])
   inc_med <- inc_med %>% 
-    filter(geo %in% neighbours[[input$country]])
+    filter(Country %in% neighbours[[input$country]])
   
-  ggplot_inc <- ggplot(inc_mean_self, aes(x = time)) +
+  ggplot_inc <- ggplot(inc_mean_self, aes(x = Date)) +
     scale_color_manual(values = viris) +
-    geom_line(data = inc_mean, aes(colour = geo, y = values)) +
-    geom_line(data = inc_med, aes(colour = geo, y = values), linetype = 3) +
-    geom_line(data = inc_mean_self, aes(y = values), colour = viris_full[1]) +
-    geom_line(data = inc_med_self, aes(y = values), colour = viris_full[1], linetype = 3) +
+    geom_line(data = inc_mean, aes(colour = Country, y = Value)) +
+    geom_line(data = inc_med, aes(colour = Country, y = Value), linetype = 3) +
+    geom_line(data = inc_mean_self, aes(y = Value), colour = viris_full[1]) +
+    geom_line(data = inc_med_self, aes(y = Value), colour = viris_full[1], linetype = 3) +
     scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y")) +
     scale_y_continuous(labels = scales::number_format(), expand = c(0, 0)) +
     theme(
