@@ -14,7 +14,6 @@ knitr::opts_chunk$set(echo = TRUE)
 # Libraries
 library(dplyr)
 library(plotly)
-library(ggplot2)
 
 viris <- rev(c( "#21908CFF", "#20A486FF", "#35B779FF", "#5DC863FF", "#8FD744FF", 
                 "#C7E020FF", "#FDE725FF"))
